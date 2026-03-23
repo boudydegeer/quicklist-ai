@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QuickList AI — AI-Powered Product Listings for Every Marketplace</title>
+    <meta name="description" content="Generate platform-optimized product listings for Amazon, Etsy, Shopify and eBay from a single product description. Join the waitlist for early access.">
+    <style>
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --navy: #0f172a;
+            --slate: #1e293b;
+            --slate-light: #334155;
+            --blue: #3b82f6;
+            --blue-hover: #2563eb;
+            --blue-glow: rgba(59, 130, 246, 0.25);
+            --white: #ffffff;
+            --gray-100: #f1f5f9;
+            --gray-300: #cbd5e1;
+            --gray-400: #94a3b8;
+            --gray-500: #64748b;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Helvetica Neue', Arial, sans-serif;
+            background-color: var(--navy);
+            color: var(--white);
+            line-height: 1.6;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        /* ── NAV ── */
+        nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            padding: 1rem 2rem;
+            background: rgba(15, 23, 42, 0.85);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-size: 1.25rem;
+            font-weight: 700;
+            letter-spacing: -0.02em;
+        }
+
+        .logo span {
+            color: var(--blue);
+        }
+
+        nav a.nav-cta {
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: var(--white);
+            background: var(--blue);
+            padding: 0.5rem 1.25rem;
+            border-radius: 6px;
+            text-decoration: none;
+            transition: background 0.2s;
+        }
+
+        nav a.nav-cta:hover {
+            background: var(--blue-hover);
+        }
+
+        /* ── SECTION COMMON ── */
+        section {
+            padding: 6rem 1.5rem;
+        }
+
+        .container {
+            max-width: 1100px;
+            margin: 0 auto;
+        }
+
+        .section-label {
+            display: inline-block;
+            font-size: 0.75rem;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--blue);
+            margin-bottom: 0.75rem;
+        }
+
+        .section-title {
+            font-size: clamp(1.75rem, 4vw, 2.5rem);
+            font-weight: 800;
+            line-height: 1.2;
+            margin-bottom: 1rem;
+            letter-spacing: -0.02em;
+        }
+
+        .section-subtitle {
+            font-size: 1.1rem;
+            color: var(--gray-400);
+            max-width: 640px;
+            margin-bottom: 3rem;
+        }
+
+        /* ── HERO ── */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding-top: 5rem;
+            background: linear-gradient(170deg, var(--navy) 0%, #0c1425 40%, var(--slate) 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: -40%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 800px;
+            height: 800px;
+            background: radial-gradient(circle, var(--blue-glow) 0%, transparent 70%);
+            pointer-events: none;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+            max-width: 780px;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.25rem, 5.5vw, 3.75rem);
+            font-weight: 800;
+            line-height: 1.1;
+            letter-spacing: -0.03em;
+            margin-bottom: 1.5rem;
+        }
+
+        .hero p {
+            font-size: clamp(1rem, 2vw, 1.2rem);
+            color: var(--gray-300);
+            max-width: 620px;
+            margin: 0 auto 2.5rem;
+            line-height: 1.7;
+        }
+
+        .btn-primary {
+            display: inline-block;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--white);
+            background: var(--blue);
+            padding: 0.875rem 2.25rem;
+            border-radius: 8px;
+            text-decoration: none;
+            border: none;
+            cursor: pointer;
+            transition: background 0.2s, box-shadow 0.2s;
+            box-shadow: 0 0 24px var(--blue-glow);
+        }
+
+        .btn-primary:hover {
+            background: var(--blue-hover);
+            box-shadow: 0 0 32px rgba(59, 130, 246, 0.4);
+        }
+
+        .hero-badges {
+            margin-top: 3rem;
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            flex-wrap: wrap;
+            color: var(--gray-500);
+            font-size: 0.875rem;
+            font-weight: 500;
+        }
+
+        .hero-badges span {
+            display: flex;
+            align-items: center;
+            gap: 0.4rem;
+        }
+
+        .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--blue);
+            display: inline-block;
+        }
+
+        /* ── PROBLEM / SOLUTION ── */
+        .problems {
+            background: var(--navy);
+        }
+
+        .cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .card {
+            background: var(--slate);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            padding: 2rem;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+
+        .card:hover {
+            border-color: rgba(59, 130, 246, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .card-icon {
+            width: 44px;
+            height: 44px;
+            border-radius: 10px;
+            background: rgba(59, 130, 246, 0.12);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1.25rem;
+            color: var(--blue);
+            font-weight: 700;
+            font-size: 1.1rem;
+        }
+
+        .card h3 {
+            font-size: 1rem;
+            font-weight: 700;
+            margin-bottom: 0.75rem;
+            line-height: 1.4;
+        }
+
+        .card p {
+            font-size: 0.925rem;
+            color: var(--gray-400);
+            line-height: 1.6;
+        }
+
+        /* ── HOW IT WORKS ── */
+        .how-it-works {
+            background: linear-gradient(180deg, var(--navy) 0%, var(--slate) 100%);
+        }
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+            gap: 2rem;
+            counter-reset: step;
+        }
+
+        .step {
+            text-align: center;
+            padding: 2rem 1.5rem;
+        }
+
+        .step-number {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: rgba(59, 130, 246, 0.1);
+            border: 2px solid var(--blue);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 1.25rem;
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--blue);
+        }
+
+        .step h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .step p {
+            font-size: 0.925rem;
+            color: var(--gray-400);
+        }
+
+        /* ── PRICING ── */
+        .pricing {
+            background: var(--slate);
+        }
+
+        .pricing .container {
+            text-align: center;
+        }
+
+        .pricing .section-subtitle {
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .pricing-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+            max-width: 960px;
+            margin: 0 auto;
+        }
+
+        .price-card {
+            background: var(--navy);
+            border: 1px solid rgba(255, 255, 255, 0.06);
+            border-radius: 12px;
+            padding: 2.5rem 2rem;
+            position: relative;
+            transition: border-color 0.2s, transform 0.2s;
+        }
+
+        .price-card:hover {
+            transform: translateY(-2px);
+        }
+
+        .price-card.popular {
+            border-color: var(--blue);
+            box-shadow: 0 0 40px var(--blue-glow);
+        }
+
+        .price-badge {
+            position: absolute;
+            top: -12px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: var(--blue);
+            color: var(--white);
+            font-size: 0.7rem;
+            font-weight: 700;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            padding: 0.3rem 1rem;
+            border-radius: 20px;
+        }
+
+        .price-card h3 {
+            font-size: 1.1rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .price-amount {
+            font-size: 2.75rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            margin-bottom: 0.25rem;
+        }
+
+        .price-amount span {
+            font-size: 1rem;
+            font-weight: 500;
+            color: var(--gray-500);
+        }
+
+        .price-desc {
+            font-size: 0.875rem;
+            color: var(--gray-500);
+            margin-bottom: 1.5rem;
+        }
+
+        .price-features {
+            list-style: none;
+            text-align: left;
+            margin-bottom: 2rem;
+        }
+
+        .price-features li {
+            font-size: 0.9rem;
+            color: var(--gray-300);
+            padding: 0.4rem 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .price-features li::before {
+            content: '';
+            width: 5px;
+            height: 5px;
+            border-radius: 50%;
+            background: var(--blue);
+            flex-shrink: 0;
+        }
+
+        /* ── SIGNUP ── */
+        .signup {
+            background: linear-gradient(180deg, var(--slate) 0%, var(--navy) 100%);
+        }
+
+        .signup .container {
+            text-align: center;
+        }
+
+        .signup .section-subtitle {
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .signup-form {
+            max-width: 480px;
+            margin: 0 auto;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 0.75rem;
+        }
+
+        .form-row input[type="email"] {
+            flex: 1;
+            padding: 0.875rem 1rem;
+            border-radius: 8px;
+            border: 1px solid var(--slate-light);
+            background: var(--slate);
+            color: var(--white);
+            font-size: 1rem;
+            font-family: inherit;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .form-row input[type="email"]:focus {
+            border-color: var(--blue);
+        }
+
+        .form-row input[type="email"]::placeholder {
+            color: var(--gray-500);
+        }
+
+        .form-row button {
+            white-space: nowrap;
+        }
+
+        .signup-note {
+            margin-top: 1rem;
+            font-size: 0.8rem;
+            color: var(--gray-500);
+            line-height: 1.5;
+        }
+
+        .signup-note strong {
+            color: var(--blue);
+        }
+
+        /* ── FOOTER ── */
+        footer {
+            background: var(--navy);
+            border-top: 1px solid rgba(255, 255, 255, 0.06);
+            text-align: center;
+            padding: 2.5rem 1.5rem;
+        }
+
+        footer p {
+            font-size: 0.85rem;
+            color: var(--gray-500);
+            line-height: 1.7;
+        }
+
+        /* ── RESPONSIVE ── */
+        @media (max-width: 640px) {
+            section {
+                padding: 4rem 1.25rem;
+            }
+
+            .form-row {
+                flex-direction: column;
+            }
+
+            .hero-badges {
+                flex-direction: column;
+                align-items: center;
+                gap: 0.75rem;
+            }
+
+            .pricing-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Nav -->
+    <nav>
+        <div class="logo">QuickList <span>AI</span></div>
+        <a href="#signup" class="nav-cta">Join the Waitlist</a>
+    </nav>
+
+    <!-- Hero -->
+    <section class="hero">
+        <div class="hero-content">
+            <p class="section-label">Coming Soon</p>
+            <h1>One product. Four marketplaces. Optimized in seconds.</h1>
+            <p>Stop copy-pasting listings across Amazon, Etsy, Shopify &amp; eBay. QuickList AI generates platform-optimized product listings with marketplace-specific SEO &mdash; from a single product description.</p>
+            <a href="#signup" class="btn-primary">Join the Waitlist</a>
+            <div class="hero-badges">
+                <span><span class="dot"></span> Amazon</span>
+                <span><span class="dot"></span> Etsy</span>
+                <span><span class="dot"></span> Shopify</span>
+                <span><span class="dot"></span> eBay</span>
+            </div>
+        </div>
+    </section>
+
+    <!-- Problem / Solution -->
+    <section class="problems">
+        <div class="container">
+            <p class="section-label">Why QuickList AI</p>
+            <h2 class="section-title">Existing tools are broken. We built something better.</h2>
+            <p class="section-subtitle">Every marketplace has its own rules, algorithms, and pitfalls. Generic AI tools ignore them all.</p>
+            <div class="cards">
+                <div class="card">
+                    <div class="card-icon">A</div>
+                    <h3>Amazon compliance built in</h3>
+                    <p>Amazon's AI listing tool causes policy violations and removals. QuickList AI has built-in marketplace compliance rules that keep your listings safe and live.</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">E</div>
+                    <h3>Etsy SEO that actually works</h3>
+                    <p>Etsy changed SEO in 2025 &mdash; keyword stuffing is penalized. We generate clean titles plus all 13 optimized tags, aligned with the latest algorithm.</p>
+                </div>
+                <div class="card">
+                    <div class="card-icon">+</div>
+                    <h3>Real content optimization</h3>
+                    <p>Cross-listing tools sync inventory, not content. We optimize the actual listing text for each platform's algorithm so every marketplace gets its best version.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- How It Works -->
+    <section class="how-it-works">
+        <div class="container" style="text-align:center;">
+            <p class="section-label">How It Works</p>
+            <h2 class="section-title">Three steps. Every marketplace covered.</h2>
+            <p class="section-subtitle" style="margin-left:auto;margin-right:auto;">No learning curve. No templates to fill out. Just results.</p>
+            <div class="steps">
+                <div class="step">
+                    <div class="step-number">1</div>
+                    <h3>Enter your product details</h3>
+                    <p>Describe your product once &mdash; title, features, materials, dimensions. That is all we need.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">2</div>
+                    <h3>Select target marketplaces</h3>
+                    <p>Choose where you sell: Amazon, Etsy, Shopify, eBay &mdash; or all four at once.</p>
+                </div>
+                <div class="step">
+                    <div class="step-number">3</div>
+                    <h3>Get optimized listings</h3>
+                    <p>Receive platform-specific, SEO-optimized listings ready to publish &mdash; in seconds.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pricing -->
+    <section class="pricing">
+        <div class="container">
+            <p class="section-label">Pricing</p>
+            <h2 class="section-title">Simple, transparent pricing</h2>
+            <p class="section-subtitle">Pick a plan that fits your catalog. Scale as you grow.</p>
+            <div class="pricing-grid">
+                <div class="price-card">
+                    <h3>Starter</h3>
+                    <div class="price-amount">$29<span>/mo</span></div>
+                    <p class="price-desc">For individual sellers getting started</p>
+                    <ul class="price-features">
+                        <li>50 optimized listings per month</li>
+                        <li>All 4 marketplace formats</li>
+                        <li>SEO keyword research</li>
+                        <li>Compliance checks</li>
+                    </ul>
+                </div>
+                <div class="price-card popular">
+                    <div class="price-badge">Most Popular</div>
+                    <h3>Pro</h3>
+                    <div class="price-amount">$79<span>/mo</span></div>
+                    <p class="price-desc">For growing multi-channel brands</p>
+                    <ul class="price-features">
+                        <li>250 optimized listings per month</li>
+                        <li>All 4 marketplace formats</li>
+                        <li>Advanced SEO + A/B title variants</li>
+                        <li>Priority support</li>
+                    </ul>
+                </div>
+                <div class="price-card">
+                    <h3>Agency</h3>
+                    <div class="price-amount">$199<span>/mo</span></div>
+                    <p class="price-desc">For agencies and high-volume sellers</p>
+                    <ul class="price-features">
+                        <li>1,000 optimized listings per month</li>
+                        <li>All 4 marketplace formats</li>
+                        <li>Bulk CSV import / export</li>
+                        <li>Dedicated account manager</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Signup -->
+    <section class="signup" id="signup">
+        <div class="container">
+            <p class="section-label">Early Access</p>
+            <h2 class="section-title">Be the first to try QuickList AI</h2>
+            <p class="section-subtitle">Join the waitlist and lock in founding-member pricing before we launch.</p>
+            <form class="signup-form" action="https://tally.so/r/PLACEHOLDER" method="POST">
+                <div class="form-row">
+                    <input type="email" name="email" placeholder="you@example.com" required aria-label="Email address">
+                    <button type="submit" class="btn-primary">Get Early Access</button>
+                </div>
+            </form>
+            <p class="signup-note"><strong>Founding members get 50% off for life.</strong> Limited to first 100 signups.</p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <p>QuickList AI &mdash; AI-powered product listings for every marketplace</p>
+        <p>&copy; 2026 QuickList AI. All rights reserved.</p>
+    </footer>
+
+</body>
+</html>
