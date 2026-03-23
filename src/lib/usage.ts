@@ -27,12 +27,14 @@ export function getUsageCount(): number {
   return getUsageData().count;
 }
 
-export function getRemainingGenerations(): number {
-  return Math.max(0, FREE_LIMIT - getUsageData().count);
+export function getRemainingGenerations(authLimit?: number): number {
+  const limit = authLimit ?? FREE_LIMIT;
+  return Math.max(0, limit - getUsageData().count);
 }
 
-export function hasReachedLimit(): boolean {
-  return getUsageData().count >= FREE_LIMIT;
+export function hasReachedLimit(authLimit?: number): boolean {
+  const limit = authLimit ?? FREE_LIMIT;
+  return getUsageData().count >= limit;
 }
 
 export function incrementUsage(): void {

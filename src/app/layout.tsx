@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Navbar from "@/components/Navbar";
 import DemoBannerWrapper from "@/components/DemoBannerWrapper";
+import { AuthProvider } from "@/contexts/AuthContext";
 import { Analytics } from "@vercel/analytics/react";
 import { Inter } from "next/font/google";
 import "./globals.css";
@@ -113,9 +114,11 @@ export default function RootLayout({
         <JsonLd />
       </head>
       <body className={[inter.variable, "font-sans antialiased"].join(" ")}>
-        <DemoBannerWrapper />
-        <Navbar />
-        {children}
+        <AuthProvider>
+          <DemoBannerWrapper />
+          <Navbar />
+          {children}
+        </AuthProvider>
         <Analytics />
       </body>
     </html>

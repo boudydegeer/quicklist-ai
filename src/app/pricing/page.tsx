@@ -1,12 +1,16 @@
 "use client";
 
+import { useState } from "react";
 import Link from "next/link";
+import { useAuth } from "@/contexts/AuthContext";
+import { isStripeConfigured } from "@/lib/config";
 
 const plans = [
   {
     name: "Free",
     price: "$0",
     period: "",
+    planKey: null,
     description: "Try it out — no account needed.",
     features: [
       "3 AI-generated listings/day",
@@ -16,13 +20,13 @@ const plans = [
       "CSV export",
     ],
     cta: "Start Generating",
-    href: "/generate",
     highlighted: false,
   },
   {
     name: "Pro",
     price: "$29",
     period: "/mo",
+    planKey: "starter",
     description: "For sellers scaling across marketplaces.",
     features: [
       "Unlimited AI-generated listings",
@@ -34,13 +38,13 @@ const plans = [
       "Priority support",
     ],
     cta: "Upgrade to Pro",
-    href: "#",
     highlighted: true,
   },
   {
     name: "Business",
     price: "$79",
     period: "/mo",
+    planKey: "pro",
     description: "For teams and agencies managing multiple brands.",
     features: [
       "Everything in Pro",
@@ -50,13 +54,45 @@ const plans = [
       "Bulk processing (1000+/day)",
       "Dedicated account manager",
     ],
-    cta: "Contact Sales",
-    href: "#",
+    cta: "Upgrade to Business",
     highlighted: false,
   },
 ];
 
 export default function PricingPage() {
+  const { user } = useAuth();
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const stripeReady = isStripeConfigured();
+
+  const handleCheckout = async (planKey: string) => {
+    setError(null);
+    setLoadingPlan(planKey);
+
+    try {
+      const res = await fetch("/api/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan: planKey }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        setError(data.error || "Something went wrong");
+        setLoadingPlan(null);
+        return;
+      }
+
+      if (data.url) {
+        window.location.href = data.url;
+      }
+    } catch {
+      setError("Failed to start checkout. Please try again.");
+      setLoadingPlan(null);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white">
       <main className="mx-auto max-w-7xl px-6 pt-32 pb-24">
@@ -68,6 +104,12 @@ export default function PricingPage() {
             Start free. Upgrade when you need more. No hidden fees.
           </p>
         </div>
+
+        {error && (
+          <div className="mx-auto mt-8 max-w-md rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-center text-sm text-red-700">
+            {error}
+          </div>
+        )}
 
         <div className="mx-auto mt-16 grid max-w-5xl gap-8 lg:grid-cols-3">
           {plans.map((plan) => (
@@ -102,22 +144,52 @@ export default function PricingPage() {
                   </li>
                 ))}
               </ul>
-              <Link
-                href={plan.href}
-                className={`block w-full rounded-xl py-3 text-center text-sm font-semibold transition-all duration-200 ${
-                  plan.highlighted
-                    ? "bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg shadow-indigo-600/25"
-                    : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
-                }`}
-              >
-                {plan.cta}
-              </Link>
+              {plan.planKey === null ? (
+                <Link
+                  href="/generate"
+                  className="block w-full rounded-xl py-3 text-center text-sm font-semibold border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 transition-all duration-200"
+                >
+                  {plan.cta}
+                </Link>
+              ) : stripeReady ? (
+                <button
+                  onClick={() => handleCheckout(plan.planKey!)}
+                  disabled={loadingPlan === plan.planKey}
+                  className={`block w-full rounded-xl py-3 text-center text-sm font-semibold transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed ${
+                    plan.highlighted
+                      ? "bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg shadow-indigo-600/25"
+                      : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+                  }`}
+                >
+                  {loadingPlan === plan.planKey ? "Redirecting..." : plan.cta}
+                </button>
+              ) : user ? (
+                <button
+                  disabled
+                  className="block w-full rounded-xl py-3 text-center text-sm font-semibold border border-slate-300 bg-slate-50 text-slate-400 cursor-not-allowed"
+                >
+                  Coming Soon
+                </button>
+              ) : (
+                <Link
+                  href="/auth/signup"
+                  className={`block w-full rounded-xl py-3 text-center text-sm font-semibold transition-all duration-200 ${
+                    plan.highlighted
+                      ? "bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg shadow-indigo-600/25"
+                      : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
+                  }`}
+                >
+                  Sign Up to Upgrade
+                </Link>
+              )}
             </div>
           ))}
         </div>
 
         <p className="mt-12 text-center text-sm text-slate-400">
-          Pro and Business plans coming soon. Free tier available now — start generating!
+          {stripeReady
+            ? "All plans include a 7-day free trial. Cancel anytime."
+            : "Pro and Business plans coming soon. Free tier available now — start generating!"}
         </p>
       </main>
     </div>

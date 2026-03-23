@@ -1,7 +1,23 @@
 import Stripe from "stripe";
 
-export const stripe = new Stripe(process.env.STRIPE_SECRET_KEY!, {
-  typescript: true,
+let _stripe: Stripe | null = null;
+
+export function getStripe(): Stripe {
+  if (!_stripe) {
+    const key = process.env.STRIPE_SECRET_KEY;
+    if (!key || key === "your-key-here") {
+      throw new Error("Stripe is not configured");
+    }
+    _stripe = new Stripe(key, { typescript: true });
+  }
+  return _stripe;
+}
+
+// Keep backward-compatible export for existing code
+export const stripe = new Proxy({} as Stripe, {
+  get(_target, prop) {
+    return (getStripe() as unknown as Record<string | symbol, unknown>)[prop];
+  },
 });
 
 export const PLANS = {

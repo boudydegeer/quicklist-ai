@@ -2,9 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
+  const { user, configured } = useAuth();
 
   return (
     <nav className="fixed top-0 z-50 w-full border-b border-slate-200/60 bg-white/80 backdrop-blur-lg" style={{ marginTop: "28px" }}>
@@ -18,7 +20,13 @@ export default function Navbar() {
           <Link href="/generate" className="text-sm text-slate-600 hover:text-slate-900 transition-colors">Generate</Link>
           <Link href="/bulk" className="text-sm text-slate-600 hover:text-slate-900 transition-colors">Bulk Upload</Link>
           <Link href="/pricing" className="text-sm text-slate-600 hover:text-slate-900 transition-colors">Pricing</Link>
-          <Link href="/dashboard" className="text-sm text-slate-600 hover:text-slate-900 transition-colors">Dashboard</Link>
+          {user ? (
+            <Link href="/dashboard" className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 transition-colors">Dashboard</Link>
+          ) : configured ? (
+            <Link href="/auth/login" className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 transition-colors">Sign In</Link>
+          ) : (
+            <Link href="/dashboard" className="text-sm text-slate-600 hover:text-slate-900 transition-colors">Dashboard</Link>
+          )}
         </div>
 
         <button
@@ -42,7 +50,13 @@ export default function Navbar() {
             <Link href="/generate" className="text-sm text-slate-600 hover:text-slate-900" onClick={() => setMenuOpen(false)}>Generate</Link>
             <Link href="/bulk" className="text-sm text-slate-600 hover:text-slate-900" onClick={() => setMenuOpen(false)}>Bulk Upload</Link>
             <Link href="/pricing" className="text-sm text-slate-600 hover:text-slate-900" onClick={() => setMenuOpen(false)}>Pricing</Link>
-            <Link href="/dashboard" className="text-sm text-slate-600 hover:text-slate-900" onClick={() => setMenuOpen(false)}>Dashboard</Link>
+            {user ? (
+              <Link href="/dashboard" className="text-sm font-medium text-indigo-600 hover:text-indigo-700" onClick={() => setMenuOpen(false)}>Dashboard</Link>
+            ) : configured ? (
+              <Link href="/auth/login" className="text-sm font-medium text-indigo-600 hover:text-indigo-700" onClick={() => setMenuOpen(false)}>Sign In</Link>
+            ) : (
+              <Link href="/dashboard" className="text-sm text-slate-600 hover:text-slate-900" onClick={() => setMenuOpen(false)}>Dashboard</Link>
+            )}
           </div>
         </div>
       )}
