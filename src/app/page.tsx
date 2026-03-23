@@ -1,8 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { useState } from "react";
-import { createClient } from "@/lib/supabase/client";
 
 const features = [
   {
@@ -12,7 +10,7 @@ const features = [
   },
   {
     title: "AI-Optimized",
-    description: "Powered by Claude AI to generate compelling, conversion-focused copy that speaks to your target audience and drives sales.",
+    description: "Powered by AI to generate compelling, conversion-focused copy that speaks to your target audience and drives sales.",
     icon: (<svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" /></svg>),
   },
   {
@@ -28,75 +26,12 @@ const features = [
 ];
 
 const plans = [
-  { name: "Starter", price: "$29", period: "/mo", listings: "50 listings", description: "Perfect for individual sellers getting started.", features: ["50 AI-generated listings/month", "All 5 marketplaces", "SEO optimization", "Copy-to-clipboard export", "Email support"], cta: "Start Free Trial", highlighted: false, planKey: "starter" },
-  { name: "Pro", price: "$79", period: "/mo", listings: "250 listings", description: "For growing businesses scaling their presence.", features: ["250 AI-generated listings/month", "All 5 marketplaces", "SEO optimization", "Bulk CSV processing", "CSV export", "Priority support"], cta: "Start Free Trial", highlighted: true, planKey: "pro" },
-  { name: "Agency", price: "$199", period: "/mo", listings: "1000 listings", description: "For agencies managing multiple brands.", features: ["1,000 AI-generated listings/month", "All 5 marketplaces", "SEO optimization", "Bulk CSV processing", "CSV & API export", "Custom brand voice", "Dedicated support"], cta: "Contact Sales", highlighted: false, planKey: "agency" },
+  { name: "Starter", price: "$29", period: "/mo", listings: "50 listings", description: "Perfect for individual sellers getting started.", features: ["50 AI-generated listings/month", "All 5 marketplaces", "SEO optimization", "Copy-to-clipboard export", "Email support"], cta: "Start Free Trial", highlighted: false },
+  { name: "Pro", price: "$79", period: "/mo", listings: "250 listings", description: "For growing businesses scaling their presence.", features: ["250 AI-generated listings/month", "All 5 marketplaces", "SEO optimization", "Bulk CSV processing", "CSV export", "Priority support"], cta: "Start Free Trial", highlighted: true },
+  { name: "Agency", price: "$199", period: "/mo", listings: "1000 listings", description: "For agencies managing multiple brands.", features: ["1,000 AI-generated listings/month", "All 5 marketplaces", "SEO optimization", "Bulk CSV processing", "CSV & API export", "Custom brand voice", "Dedicated support"], cta: "Contact Sales", highlighted: false },
 ];
 
-const PLAN_PRICE_IDS: Record<string, string | undefined> = {
-  starter: process.env.NEXT_PUBLIC_STRIPE_STARTER_PRICE_ID,
-  pro: process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID,
-  agency: process.env.NEXT_PUBLIC_STRIPE_AGENCY_PRICE_ID,
-};
-
 export default function HomePage() {
-  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
-
-  const handlePlanClick = async (planKey: string) => {
-    if (planKey === "agency") {
-      window.location.href = "mailto:sales@quicklistai.com?subject=Agency Plan Inquiry";
-      return;
-    }
-
-    setLoadingPlan(planKey);
-
-    try {
-      // Check if Supabase is configured
-      const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-      const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-      const supabaseReady = url && url !== "your-url-here" && key && key !== "your-key-here";
-
-      if (!supabaseReady) {
-        alert("Payments are not configured in demo mode. Sign up when the full version launches!");
-        return;
-      }
-
-      const supabase = createClient();
-      const {
-        data: { user },
-      } = await supabase.auth.getUser();
-
-      if (!user) {
-        window.location.href = `/auth/signup?redirect=/#pricing`;
-        return;
-      }
-
-      const priceId = PLAN_PRICE_IDS[planKey];
-      if (!priceId) {
-        alert("Pricing is not configured yet. Please try again later.");
-        return;
-      }
-
-      const response = await fetch("/api/stripe/checkout", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ priceId, userId: user.id }),
-      });
-
-      const data = await response.json();
-
-      if (data.url) {
-        window.location.href = data.url;
-      } else {
-        alert("Failed to create checkout session. Please try again.");
-      }
-    } catch {
-      alert("Something went wrong. Please try again.");
-    } finally {
-      setLoadingPlan(null);
-    }
-  };
-
   return (
     <div className="min-h-screen bg-white text-slate-900">
 
@@ -110,7 +45,7 @@ export default function HomePage() {
           <div className="mx-auto max-w-3xl">
             <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50 px-4 py-1.5 text-sm text-indigo-700">
               <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" /></svg>
-              Powered by Claude AI
+              Powered by AI
             </div>
             <h1 className="mb-6 text-5xl font-bold tracking-tight text-slate-900 sm:text-6xl lg:text-7xl">
               <span className="bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent">QuickList AI</span>
@@ -118,8 +53,8 @@ export default function HomePage() {
             <p className="mb-4 text-xl text-slate-600 sm:text-2xl">AI-powered product listings for every marketplace</p>
             <p className="mx-auto mb-10 max-w-2xl text-base text-slate-500">Generate optimized, conversion-focused product listings for Amazon, Etsy, Shopify, eBay, and more in seconds.</p>
             <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
-              <Link href="/generate" className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-8 py-3.5 text-base font-semibold text-white shadow-lg shadow-indigo-600/25 hover:bg-indigo-700 transition-all duration-200">Get Started<svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg></Link>
-              <Link href="/generate" className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-8 py-3.5 text-base font-semibold text-slate-700 hover:bg-slate-50 transition-all duration-200">Try Demo</Link>
+              <Link href="/generate" className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-8 py-3.5 text-base font-semibold text-white shadow-lg shadow-indigo-600/25 hover:bg-indigo-700 transition-all duration-200">Try It Now<svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg></Link>
+              <Link href="/dashboard" className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-8 py-3.5 text-base font-semibold text-slate-700 hover:bg-slate-50 transition-all duration-200">View Dashboard</Link>
             </div>
           </div>
         </div>
@@ -170,16 +105,18 @@ export default function HomePage() {
                     </li>
                   ))}
                 </ul>
-                <button
-                  onClick={() => handlePlanClick(plan.planKey)}
-                  disabled={loadingPlan === plan.planKey}
-                  className={`w-full rounded-xl py-3 text-sm font-semibold transition-all duration-200 disabled:opacity-50 ${plan.highlighted ? "bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg shadow-indigo-600/25" : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"}`}
+                <Link
+                  href="/generate"
+                  className={`block w-full rounded-xl py-3 text-center text-sm font-semibold transition-all duration-200 ${plan.highlighted ? "bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg shadow-indigo-600/25" : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"}`}
                 >
-                  {loadingPlan === plan.planKey ? "Loading..." : plan.cta}
-                </button>
+                  {plan.cta}
+                </Link>
               </div>
             ))}
           </div>
+          <p className="mt-8 text-center text-sm text-slate-400">
+            Full payment integration coming soon. Try the demo now!
+          </p>
         </div>
       </section>
 

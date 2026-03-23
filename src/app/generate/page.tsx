@@ -1,8 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import CopyButton from "@/components/CopyButton";
+import { getDemoListing } from "@/lib/demo";
 import type { Marketplace, GeneratedListing } from "@/types";
 
 const MARKETPLACES: { value: Marketplace; label: string }[] = [
@@ -30,21 +30,31 @@ export default function GeneratePage() {
     setError(null);
     setResult(null);
     try {
-      const response = await fetch("/api/generate", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, category, features, marketplace, targetAudience: targetAudience || undefined, priceRange: priceRange || undefined }),
+      // Simulate network delay for realistic feel
+      await new Promise((resolve) => setTimeout(resolve, 800));
+      const listing = getDemoListing({
+        name,
+        category,
+        features,
+        marketplace,
+        targetAudience: targetAudience || undefined,
+        priceRange: priceRange || undefined,
       });
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Failed to generate listing");
-      setResult(data);
+      setResult(listing);
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
-    } finally { setLoading(false); }
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <div className="min-h-screen bg-slate-50">
+      <div className="mx-auto max-w-7xl px-6 pt-4">
+        <div className="rounded-xl border border-indigo-200 bg-indigo-50 p-3 text-center text-sm text-indigo-700">
+          Demo Mode — Sign up for real AI-powered listings when we launch!
+        </div>
+      </div>
 
       <main className="mx-auto max-w-7xl px-6 py-10">
         <div className="mb-8">

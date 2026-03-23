@@ -2,16 +2,36 @@
 
 import { useState, useCallback, useRef } from "react";
 import Link from "next/link";
+import { getDemoListing } from "@/lib/demo";
+import type { Marketplace, GeneratedListing } from "@/types";
 
 interface BulkResult {
   index: number;
   input: { name: string; category: string; features: string; marketplace: string };
-  listing?: {
-    title: string; description: string; bulletPoints: string[];
-    metaTitle: string; metaDescription: string; seoKeywords: string[];
-    imageAltText: string; marketplace: string;
-  };
+  listing?: GeneratedListing;
   error?: string;
+}
+
+const VALID_MARKETPLACES = ["amazon", "etsy", "shopify", "ebay", "generic"];
+
+function parseCSV(csv: string): string[][] {
+  const lines = csv.trim().split("\n");
+  return lines.map((line) => {
+    const result: string[] = [];
+    let current = "";
+    let inQuotes = false;
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+      if (char === '"') {
+        if (inQuotes && line[i + 1] === '"') { current += '"'; i++; }
+        else { inQuotes = !inQuotes; }
+      } else if (char === "," && !inQuotes) {
+        result.push(current.trim()); current = "";
+      } else { current += char; }
+    }
+    result.push(current.trim());
+    return result;
+  });
 }
 
 export default function BulkPage() {
@@ -51,19 +71,51 @@ export default function BulkPage() {
 
   const handleProcess = async () => {
     if (!csvText) return;
-    setProcessing(true); setError(null); setResults(null); setProgress(10);
-    const progressInterval = setInterval(() => { setProgress((p) => Math.min(p + 5, 90)); }, 2000);
+    setProcessing(true); setError(null); setResults(null); setProgress(0);
+
     try {
-      const response = await fetch("/api/generate-bulk", {
-        method: "POST", headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ csv: csvText }),
-      });
-      clearInterval(progressInterval); setProgress(95);
-      const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Bulk processing failed");
-      setResults(data.results); setProgress(100);
+      const rows = parseCSV(csvText);
+      if (rows.length < 2) throw new Error("CSV must have a header row and at least one data row");
+
+      const header = rows[0].map((h) => h.toLowerCase().replace(/\s+/g, "_"));
+      const nameIdx = header.indexOf("product_name");
+      const catIdx = header.indexOf("category");
+      const featIdx = header.indexOf("features");
+      const mktIdx = header.indexOf("marketplace");
+
+      if (nameIdx === -1 || catIdx === -1 || featIdx === -1 || mktIdx === -1) {
+        throw new Error("CSV must have columns: product_name, category, features, marketplace");
+      }
+
+      const dataRows = rows.slice(1).filter((row) => row.some((cell) => cell));
+      const bulkResults: BulkResult[] = [];
+
+      for (let i = 0; i < dataRows.length; i++) {
+        const row = dataRows[i];
+        const marketplace = (row[mktIdx] || "generic").toLowerCase();
+
+        setProgress(Math.round(((i + 1) / dataRows.length) * 100));
+
+        if (!VALID_MARKETPLACES.includes(marketplace)) {
+          bulkResults.push({ index: i, input: { name: row[nameIdx] || "", category: row[catIdx] || "", features: row[featIdx] || "", marketplace: "generic" }, error: `Invalid marketplace "${row[mktIdx]}". Skipped.` });
+          continue;
+        }
+
+        const input = { name: (row[nameIdx] || "").trim(), category: (row[catIdx] || "").trim(), features: (row[featIdx] || "").trim(), marketplace: marketplace as Marketplace };
+
+        if (!input.name || !input.category || !input.features) {
+          bulkResults.push({ index: i, input: { ...input, marketplace }, error: "Missing required fields. Skipped." });
+          continue;
+        }
+
+        // Simulate processing delay
+        await new Promise((resolve) => setTimeout(resolve, 300));
+        const listing = getDemoListing(input);
+        bulkResults.push({ index: i, input: { ...input, marketplace }, listing });
+      }
+
+      setResults(bulkResults); setProgress(100);
     } catch (err) {
-      clearInterval(progressInterval);
       setError(err instanceof Error ? err.message : "Something went wrong"); setProgress(0);
     } finally { setProcessing(false); }
   };
@@ -87,17 +139,7 @@ export default function BulkPage() {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <header className="border-b border-slate-200 bg-white">
-        <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-white text-sm font-bold">Q</div>
-            <span className="text-lg font-semibold">QuickList AI</span>
-          </Link>
-          <Link href="/generate" className="text-sm text-slate-600 hover:text-slate-900 transition-colors">Single Generate</Link>
-        </div>
-      </header>
-
-      <main className="mx-auto max-w-5xl px-6 py-10">
+      <main className="mx-auto max-w-5xl px-6 py-10 pt-26">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-slate-900">Bulk Processing</h1>
           <p className="mt-2 text-slate-500">Upload a CSV file to generate optimized listings for multiple products at once.</p>
@@ -140,7 +182,6 @@ export default function BulkPage() {
             <div className="h-3 overflow-hidden rounded-full bg-slate-100">
               <div className="h-full rounded-full bg-indigo-600 transition-all duration-500" style={{ width: `${progress}%` }} />
             </div>
-            <p className="mt-2 text-xs text-slate-400">This may take a while depending on the number of products.</p>
           </div>
         )}
 
