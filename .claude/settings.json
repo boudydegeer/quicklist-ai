@@ -1,0 +1,37 @@
+{
+  "permissions": {
+    "allow": [
+      "Read",
+      "Edit",
+      "Write",
+      "Glob",
+      "Grep",
+      "Bash(curl*)",
+      "Bash(npm*)",
+      "Bash(npx*)",
+      "Bash(node*)",
+      "Bash(git*)",
+      "Bash(ls*)",
+      "Bash(mkdir*)",
+      "Bash(cd*)",
+      "Bash(cat*)",
+      "Bash(echo*)",
+      "Bash(cp*)",
+      "Bash(rm*)",
+      "Bash(mv*)",
+      "Bash(touch*)",
+      "Bash(find*)",
+      "Bash(grep*)",
+      "Bash(sed*)",
+      "Bash(awk*)",
+      "Bash(head*)",
+      "Bash(tail*)",
+      "Bash(wc*)",
+      "Bash(gh *)",
+      "Bash(which*)",
+      "Bash(pwd*)",
+      "Bash(env*)",
+      "Bash(export*)"
+    ]
+  }
+}
