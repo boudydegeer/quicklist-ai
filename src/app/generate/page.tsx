@@ -10,7 +10,10 @@ import {
   getRemainingGenerations,
   FREE_DAILY_LIMIT,
 } from "@/lib/usage";
+import { getDemoListingsForAll } from "@/lib/demo";
 import type { Marketplace, GeneratedListing } from "@/types";
+
+const IS_STATIC = process.env.NEXT_PUBLIC_STATIC_EXPORT === "true";
 
 const MARKETPLACE_TABS: { key: Marketplace; label: string; color: string; bg: string; border: string }[] = [
   { key: "amazon", label: "Amazon", color: "text-orange-700", bg: "bg-orange-50", border: "border-orange-300" },
@@ -129,6 +132,24 @@ export default function GeneratePage() {
     setResultMode(null);
 
     try {
+      // In static export mode, use demo data directly (no API route available)
+      if (IS_STATIC) {
+        const listings = getDemoListingsForAll({
+          name,
+          category,
+          features,
+          targetAudience: targetAudience || undefined,
+          priceRange: priceRange || undefined,
+        });
+        // Simulate brief loading for UX
+        await new Promise((resolve) => setTimeout(resolve, 2000));
+        setResults(listings);
+        setResultMode("demo");
+        setActiveTab("amazon");
+        incrementUsage();
+        return;
+      }
+
       const headers: Record<string, string> = {
         "Content-Type": "application/json",
       };

@@ -5,6 +5,7 @@
   "scripts": {
     "dev": "next dev",
     "build": "NODE_ENV=production next build",
+    "build:static": "mv src/app/api src/app/_api_tmp && STATIC_EXPORT=true NEXT_PUBLIC_STATIC_EXPORT=true next build || true; mv src/app/_api_tmp src/app/api && test -f out/index.html",
     "start": "next start",
     "lint": "next lint"
   },
