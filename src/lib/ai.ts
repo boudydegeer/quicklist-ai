@@ -1,4 +1,5 @@
 import type { ProductInput, GeneratedListing, Marketplace } from "@/types";
+import { isDemoMode, getDemoListing } from "@/lib/demo";
 
 const MARKETPLACE_INSTRUCTIONS: Record<Marketplace, string> = {
   amazon: `Optimize for Amazon's A9 search algorithm:
@@ -66,6 +67,12 @@ IMPORTANT: Return ONLY the JSON object. No markdown, no code fences, no explanat
 export async function generateListing(
   input: ProductInput
 ): Promise<GeneratedListing> {
+  if (isDemoMode()) {
+    // Simulate a small delay to feel realistic
+    await new Promise((resolve) => setTimeout(resolve, 800));
+    return getDemoListing(input);
+  }
+
   const apiKey = process.env.ANTHROPIC_API_KEY;
 
   if (!apiKey || apiKey === "your-key-here") {

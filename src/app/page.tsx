@@ -51,6 +51,16 @@ export default function HomePage() {
     setLoadingPlan(planKey);
 
     try {
+      // Check if Supabase is configured
+      const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+      const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+      const supabaseReady = url && url !== "your-url-here" && key && key !== "your-key-here";
+
+      if (!supabaseReady) {
+        alert("Payments are not configured in demo mode. Sign up when the full version launches!");
+        return;
+      }
+
       const supabase = createClient();
       const {
         data: { user },

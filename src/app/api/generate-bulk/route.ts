@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
 import { generateListing } from "@/lib/ai";
+import { isDemoMode, isSupabaseConfigured } from "@/lib/demo";
 import type { ProductInput, Marketplace, GeneratedListing } from "@/types";
 
 const VALID_MARKETPLACES: Marketplace[] = [
@@ -54,13 +54,21 @@ function delay(ms: number): Promise<void> {
 
 export async function POST(request: Request) {
   try {
-    const supabase = await createClient();
-    const {
-      data: { user },
-    } = await supabase.auth.getUser();
+    const demo = isDemoMode();
+    let dbUser: { id: string } | null = null;
+    let dbClient: Awaited<ReturnType<typeof import("@/lib/supabase/server").createClient>> | null = null;
 
-    if (!user) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    if (!demo && isSupabaseConfigured()) {
+      const { createClient } = await import("@/lib/supabase/server");
+      dbClient = await createClient();
+      const {
+        data: { user },
+      } = await dbClient.auth.getUser();
+
+      if (!user) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
+      dbUser = user;
     }
 
     const body = await request.json();
@@ -143,15 +151,17 @@ export async function POST(request: Request) {
       try {
         const listing = await generateListing(input);
 
-        // Save generation to database
-        await supabase.from("generations").insert({
-          user_id: user.id,
-          product_name: input.name,
-          category: input.category,
-          marketplace: input.marketplace,
-          input_data: input,
-          output_data: listing,
-        });
+        // Save generation to database (skip in demo mode)
+        if (dbUser && dbClient) {
+          await dbClient.from("generations").insert({
+            user_id: dbUser.id,
+            product_name: input.name,
+            category: input.category,
+            marketplace: input.marketplace,
+            input_data: input,
+            output_data: listing,
+          });
+        }
 
         results.push({ index: i, input, listing });
       } catch (error) {
@@ -161,11 +171,11 @@ export async function POST(request: Request) {
       }
     }
 
-    // Increment usage counter for successful generations
+    // Increment usage counter for successful generations (skip in demo mode)
     const successCount = results.filter((r) => r.listing).length;
-    if (successCount > 0) {
-      await supabase.rpc("increment_generations_used", {
-        uid: user.id,
+    if (successCount > 0 && dbUser && dbClient) {
+      await dbClient.rpc("increment_generations_used", {
+        uid: dbUser.id,
         count: successCount,
       });
     }

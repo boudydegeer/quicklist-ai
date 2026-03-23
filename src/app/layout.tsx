@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Navbar from "@/components/Navbar";
+import DemoBannerWrapper from "@/components/DemoBannerWrapper";
 import { Inter } from "next/font/google";
 import "./globals.css";
 
@@ -32,6 +33,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body className={[inter.variable, "font-sans antialiased"].join(" ")}>
+        <DemoBannerWrapper />
         <Navbar />
         {children}
       </body>

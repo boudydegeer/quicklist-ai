@@ -19,13 +19,62 @@ interface Generation {
   created_at: string;
 }
 
+const DEMO_PROFILE: UserProfile = {
+  email: "demo@quicklistai.com",
+  plan: "pro",
+  generations_used: 4,
+  generations_limit: 250,
+};
+
+const DEMO_GENERATIONS: Generation[] = [
+  {
+    id: "demo-1",
+    product_name: "Organic Bamboo Cutting Board",
+    marketplace: "amazon",
+    created_at: new Date(Date.now() - 1000 * 60 * 30).toISOString(),
+  },
+  {
+    id: "demo-2",
+    product_name: "Hand-Poured Soy Candle",
+    marketplace: "etsy",
+    created_at: new Date(Date.now() - 1000 * 60 * 60 * 2).toISOString(),
+  },
+  {
+    id: "demo-3",
+    product_name: "Wireless Bluetooth Speaker",
+    marketplace: "shopify",
+    created_at: new Date(Date.now() - 1000 * 60 * 60 * 5).toISOString(),
+  },
+  {
+    id: "demo-4",
+    product_name: "Vintage Leather Journal",
+    marketplace: "ebay",
+    created_at: new Date(Date.now() - 1000 * 60 * 60 * 24).toISOString(),
+  },
+];
+
+function isSupabaseConfigured(): boolean {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  return !!(url && url !== "your-url-here" && key && key !== "your-key-here");
+}
+
 export default function DashboardPage() {
   const router = useRouter();
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [generations, setGenerations] = useState<Generation[]>([]);
   const [loading, setLoading] = useState(true);
+  const [demoMode, setDemoMode] = useState(false);
 
   useEffect(() => {
+    if (!isSupabaseConfigured()) {
+      setDemoMode(true);
+      setProfile(DEMO_PROFILE);
+      setGenerations(DEMO_GENERATIONS);
+      setLoading(false);
+      return;
+    }
+
     const loadDashboard = async () => {
       const supabase = createClient();
       const {
@@ -37,7 +86,6 @@ export default function DashboardPage() {
         return;
       }
 
-      // Fetch profile
       const { data: profileData } = await supabase
         .from("profiles")
         .select("email, plan, generations_used, generations_limit")
@@ -55,7 +103,6 @@ export default function DashboardPage() {
         });
       }
 
-      // Fetch recent generations
       const { data: genData } = await supabase
         .from("generations")
         .select("id, product_name, marketplace, created_at")
@@ -73,6 +120,10 @@ export default function DashboardPage() {
   }, []);
 
   const handleSignOut = async () => {
+    if (demoMode) {
+      router.push("/");
+      return;
+    }
     const supabase = createClient();
     await supabase.auth.signOut();
     router.push("/");

@@ -5,13 +5,26 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { createClient } from "@/lib/supabase/client";
 
+function isSupabaseConfigured(): boolean {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  return !!(url && url !== "your-url-here" && key && key !== "your-key-here");
+}
+
 export default function Navbar() {
   const router = useRouter();
   const [userEmail, setUserEmail] = useState<string | null>(null);
   const [menuOpen, setMenuOpen] = useState(false);
   const [loading, setLoading] = useState(true);
+  const [demoMode, setDemoMode] = useState(false);
 
   useEffect(() => {
+    if (!isSupabaseConfigured()) {
+      setDemoMode(true);
+      setUserEmail("demo@quicklistai.com");
+      setLoading(false);
+      return;
+    }
     const getUser = async () => {
       const supabase = createClient();
       const { data: { user } } = await supabase.auth.getUser();
@@ -22,6 +35,10 @@ export default function Navbar() {
   }, []);
 
   const handleSignOut = async () => {
+    if (demoMode) {
+      router.push("/");
+      return;
+    }
     const supabase = createClient();
     await supabase.auth.signOut();
     setUserEmail(null);
@@ -29,7 +46,7 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="fixed top-0 z-50 w-full border-b border-slate-200/60 bg-white/80 backdrop-blur-lg">
+    <nav className="fixed top-0 z-50 w-full border-b border-slate-200/60 bg-white/80 backdrop-blur-lg" style={demoMode ? { marginTop: "28px" } : undefined}>
       <div className="mx-auto flex h-16 max-w-7xl items-center justify-between px-6">
         <Link href="/" className="flex items-center gap-2">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-600 text-white text-sm font-bold">Q</div>

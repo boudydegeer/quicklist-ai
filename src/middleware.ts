@@ -4,8 +4,19 @@ import type { NextRequest } from "next/server";
 
 const protectedRoutes = ["/dashboard", "/generate", "/bulk"];
 
+function isSupabaseConfigured(): boolean {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  return !!(url && url !== "your-url-here" && key && key !== "your-key-here");
+}
+
 export async function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+
+  // In demo mode, skip all auth checks
+  if (!isSupabaseConfigured()) {
+    return NextResponse.next({ request: { headers: request.headers } });
+  }
 
   if (
     pathname === "/" ||
