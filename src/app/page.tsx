@@ -26,9 +26,9 @@ const features = [
 ];
 
 const plans = [
-  { name: "Starter", price: "$29", period: "/mo", listings: "50 listings", description: "Perfect for individual sellers getting started.", features: ["50 AI-generated listings/month", "All 5 marketplaces", "SEO optimization", "Copy-to-clipboard export", "Email support"], cta: "Start Free Trial", highlighted: false },
-  { name: "Pro", price: "$79", period: "/mo", listings: "250 listings", description: "For growing businesses scaling their presence.", features: ["250 AI-generated listings/month", "All 5 marketplaces", "SEO optimization", "Bulk CSV processing", "CSV export", "Priority support"], cta: "Start Free Trial", highlighted: true },
-  { name: "Agency", price: "$199", period: "/mo", listings: "1000 listings", description: "For agencies managing multiple brands.", features: ["1,000 AI-generated listings/month", "All 5 marketplaces", "SEO optimization", "Bulk CSV processing", "CSV & API export", "Custom brand voice", "Dedicated support"], cta: "Contact Sales", highlighted: false },
+  { name: "Free", price: "$0", period: "", listings: "3/day", description: "Try it out — no account needed.", features: ["3 AI-generated listings/day", "All 4 marketplaces", "SEO optimization", "Copy-to-clipboard", "CSV export"], cta: "Start Generating", highlighted: false },
+  { name: "Pro", price: "$29", period: "/mo", listings: "Unlimited", description: "For sellers scaling across marketplaces.", features: ["Unlimited listings", "All 4 marketplaces", "Bulk CSV processing", "Generation history", "Priority support"], cta: "Upgrade to Pro", highlighted: true },
+  { name: "Business", price: "$79", period: "/mo", listings: "Unlimited+", description: "For teams and agencies.", features: ["Everything in Pro", "Team access (5 members)", "Custom brand voice", "API access", "Dedicated support"], cta: "Contact Sales", highlighted: false },
 ];
 
 export default function HomePage() {
@@ -82,7 +82,7 @@ export default function HomePage() {
         <div className="mx-auto max-w-7xl px-6">
           <div className="mx-auto max-w-2xl text-center">
             <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">Simple, transparent pricing</h2>
-            <p className="mt-4 text-lg text-slate-500">Choose the plan that fits your business. All plans include a 14-day free trial.</p>
+            <p className="mt-4 text-lg text-slate-500">Start free. Upgrade when you need more.</p>
           </div>
           <div className="mx-auto mt-16 grid max-w-5xl gap-8 lg:grid-cols-3">
             {plans.map((plan) => (
@@ -114,9 +114,11 @@ export default function HomePage() {
               </div>
             ))}
           </div>
-          <p className="mt-8 text-center text-sm text-slate-400">
-            Full payment integration coming soon. Try the demo now!
-          </p>
+          <div className="mt-8 text-center">
+            <Link href="/pricing" className="text-sm font-medium text-indigo-600 hover:text-indigo-700 transition-colors">
+              View full pricing details &rarr;
+            </Link>
+          </div>
         </div>
       </section>
 
@@ -129,7 +131,7 @@ export default function HomePage() {
             </div>
             <div className="flex gap-8">
               <a href="#features" className="text-sm text-slate-500 hover:text-slate-700 transition-colors">Features</a>
-              <a href="#pricing" className="text-sm text-slate-500 hover:text-slate-700 transition-colors">Pricing</a>
+              <Link href="/pricing" className="text-sm text-slate-500 hover:text-slate-700 transition-colors">Pricing</Link>
               <Link href="/generate" className="text-sm text-slate-500 hover:text-slate-700 transition-colors">Generate</Link>
               <Link href="/bulk" className="text-sm text-slate-500 hover:text-slate-700 transition-colors">Bulk</Link>
             </div>

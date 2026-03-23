@@ -17,8 +17,8 @@ export default function Navbar() {
         <div className="hidden items-center gap-6 md:flex">
           <Link href="/generate" className="text-sm text-slate-600 hover:text-slate-900 transition-colors">Generate</Link>
           <Link href="/bulk" className="text-sm text-slate-600 hover:text-slate-900 transition-colors">Bulk Upload</Link>
+          <Link href="/pricing" className="text-sm text-slate-600 hover:text-slate-900 transition-colors">Pricing</Link>
           <Link href="/dashboard" className="text-sm text-slate-600 hover:text-slate-900 transition-colors">Dashboard</Link>
-          <span className="text-sm text-slate-500">demo@quicklistai.com</span>
         </div>
 
         <button
@@ -41,9 +41,8 @@ export default function Navbar() {
           <div className="flex flex-col gap-3">
             <Link href="/generate" className="text-sm text-slate-600 hover:text-slate-900" onClick={() => setMenuOpen(false)}>Generate</Link>
             <Link href="/bulk" className="text-sm text-slate-600 hover:text-slate-900" onClick={() => setMenuOpen(false)}>Bulk Upload</Link>
+            <Link href="/pricing" className="text-sm text-slate-600 hover:text-slate-900" onClick={() => setMenuOpen(false)}>Pricing</Link>
             <Link href="/dashboard" className="text-sm text-slate-600 hover:text-slate-900" onClick={() => setMenuOpen(false)}>Dashboard</Link>
-            <div className="my-2 h-px bg-slate-200" />
-            <span className="text-sm text-slate-500">demo@quicklistai.com</span>
           </div>
         </div>
       )}

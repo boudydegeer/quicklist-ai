@@ -201,6 +201,18 @@ export function getDemoListing(input: ProductInput): GeneratedListing {
   return { ...base, marketplace: input.marketplace };
 }
 
+const MULTI_MARKETPLACES: Marketplace[] = ["amazon", "etsy", "shopify", "ebay"];
+
+export function getDemoListingsForAll(
+  input: Omit<ProductInput, "marketplace">
+): Record<Marketplace, GeneratedListing> {
+  const result = {} as Record<Marketplace, GeneratedListing>;
+  for (const mp of MULTI_MARKETPLACES) {
+    result[mp] = getDemoListing({ ...input, marketplace: mp });
+  }
+  return result;
+}
+
 export const DEMO_GENERATIONS = [
   {
     id: "demo-1",
