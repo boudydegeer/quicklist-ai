@@ -72,8 +72,11 @@ function getProvider(): AIProvider {
   return "anthropic";
 }
 
-async function callAnthropicAPI(prompt: string): Promise<string> {
-  const apiKey = process.env.ANTHROPIC_API_KEY;
+async function callAnthropicAPI(
+  prompt: string,
+  overrideKey?: string
+): Promise<string> {
+  const apiKey = overrideKey || process.env.ANTHROPIC_API_KEY;
 
   if (!apiKey || apiKey === "your-key-here") {
     throw new Error(
@@ -112,8 +115,11 @@ async function callAnthropicAPI(prompt: string): Promise<string> {
   return content;
 }
 
-async function callGeminiAPI(prompt: string): Promise<string> {
-  const apiKey = process.env.GEMINI_API_KEY;
+async function callGeminiAPI(
+  prompt: string,
+  overrideKey?: string
+): Promise<string> {
+  const apiKey = overrideKey || process.env.GEMINI_API_KEY;
 
   if (!apiKey || apiKey === "your-key-here") {
     throw new Error(
@@ -185,21 +191,29 @@ function parseAIResponse(
   return listing;
 }
 
+export interface GenerateOptions {
+  apiKey?: string;
+  provider?: AIProvider;
+}
+
 export async function generateListing(
-  input: ProductInput
+  input: ProductInput,
+  options?: GenerateOptions
 ): Promise<GeneratedListing> {
-  if (isDemoMode()) {
+  const hasOverrideKey = !!options?.apiKey;
+
+  if (!hasOverrideKey && isDemoMode()) {
     await new Promise((resolve) => setTimeout(resolve, 800));
     return getDemoListing(input);
   }
 
   const prompt = buildPrompt(input);
-  const provider = getProvider();
+  const provider = options?.provider || getProvider();
 
   const content =
     provider === "gemini"
-      ? await callGeminiAPI(prompt)
-      : await callAnthropicAPI(prompt);
+      ? await callGeminiAPI(prompt, options?.apiKey)
+      : await callAnthropicAPI(prompt, options?.apiKey);
 
   return parseAIResponse(content, input.marketplace);
 }

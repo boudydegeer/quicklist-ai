@@ -1,10 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import CopyButton from "@/components/CopyButton";
 import WaitlistForm from "@/components/WaitlistForm";
-import { getDemoListingsForAll } from "@/lib/demo";
 import {
   hasReachedLimit,
   incrementUsage,
@@ -19,6 +18,21 @@ const MARKETPLACE_TABS: { key: Marketplace; label: string; color: string; bg: st
   { key: "shopify", label: "Shopify", color: "text-green-700", bg: "bg-green-50", border: "border-green-300" },
   { key: "ebay", label: "eBay", color: "text-blue-700", bg: "bg-blue-50", border: "border-blue-300" },
 ];
+
+const API_KEY_STORAGE_KEY = "quicklist-ai-api-key";
+
+function getStoredApiKey(): string {
+  if (typeof window === "undefined") return "";
+  return localStorage.getItem(API_KEY_STORAGE_KEY) || "";
+}
+
+function setStoredApiKey(key: string) {
+  if (key) {
+    localStorage.setItem(API_KEY_STORAGE_KEY, key);
+  } else {
+    localStorage.removeItem(API_KEY_STORAGE_KEY);
+  }
+}
 
 function exportAsCSV(results: Record<Marketplace, GeneratedListing>, productName: string) {
   const headers = ["Marketplace", "Title", "Description", "Bullet Points", "Meta Title", "Meta Description", "SEO Keywords", "Image Alt Text"];
@@ -58,6 +72,27 @@ export default function GeneratePage() {
   const [error, setError] = useState<string | null>(null);
   const [showUpgrade, setShowUpgrade] = useState(false);
   const [showWaitlistCta, setShowWaitlistCta] = useState(true);
+  const [resultMode, setResultMode] = useState<"demo" | "live" | null>(null);
+
+  // BYOK state
+  const [showSettings, setShowSettings] = useState(false);
+  const [apiKey, setApiKey] = useState("");
+  const [keySaved, setKeySaved] = useState(false);
+
+  useEffect(() => {
+    setApiKey(getStoredApiKey());
+  }, []);
+
+  const handleSaveKey = () => {
+    setStoredApiKey(apiKey);
+    setKeySaved(true);
+    setTimeout(() => setKeySaved(false), 2000);
+  };
+
+  const handleClearKey = () => {
+    setApiKey("");
+    setStoredApiKey("");
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -71,17 +106,38 @@ export default function GeneratePage() {
     setError(null);
     setResults(null);
     setShowUpgrade(false);
+    setResultMode(null);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1200));
-      const listings = getDemoListingsForAll({
-        name,
-        category,
-        features,
-        targetAudience: targetAudience || undefined,
-        priceRange: priceRange || undefined,
+      const headers: Record<string, string> = {
+        "Content-Type": "application/json",
+      };
+
+      const storedKey = getStoredApiKey();
+      if (storedKey) {
+        headers["X-API-Key"] = storedKey;
+      }
+
+      const response = await fetch("/api/generate", {
+        method: "POST",
+        headers,
+        body: JSON.stringify({
+          name,
+          category,
+          features,
+          targetAudience: targetAudience || undefined,
+          priceRange: priceRange || undefined,
+        }),
       });
-      setResults(listings);
+
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.error || `Server error (${response.status})`);
+      }
+
+      const data = await response.json();
+      setResults(data.listings);
+      setResultMode(data.mode);
       setActiveTab("amazon");
       incrementUsage();
     } catch (err) {
@@ -104,10 +160,71 @@ export default function GeneratePage() {
               Enter your product details and get optimized listings for all 4 marketplaces at once.
             </p>
           </div>
-          <div className="hidden sm:block rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-600">
-            <span className="font-medium">{remaining}</span>/{FREE_DAILY_LIMIT} free generations remaining today
+          <div className="hidden sm:flex items-center gap-3">
+            <button
+              onClick={() => setShowSettings(!showSettings)}
+              className="rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm text-slate-600 hover:bg-slate-50 transition-all inline-flex items-center gap-1.5"
+              title="API Settings"
+            >
+              <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              Settings
+            </button>
+            <div className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-600">
+              <span className="font-medium">{remaining}</span>/{FREE_DAILY_LIMIT} free generations remaining today
+            </div>
           </div>
         </div>
+
+        {/* BYOK Settings Panel */}
+        {showSettings && (
+          <div className="mb-8 rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold text-slate-900">API Settings (BYOK)</h3>
+              <button onClick={() => setShowSettings(false)} className="text-slate-400 hover:text-slate-600">
+                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            <p className="text-sm text-slate-500 mb-4">
+              Bring your own API key for real AI-powered listings. Supports Anthropic (sk-ant-...) and Google Gemini keys. Your key is stored locally in your browser and never saved on our servers.
+            </p>
+            <div className="flex gap-3">
+              <input
+                type="password"
+                value={apiKey}
+                onChange={(e) => setApiKey(e.target.value)}
+                placeholder="Enter your API key (sk-ant-... or Gemini key)"
+                className="flex-1 rounded-lg border border-slate-300 px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
+              />
+              <button
+                onClick={handleSaveKey}
+                className="rounded-lg bg-indigo-600 px-4 py-2.5 text-sm font-medium text-white hover:bg-indigo-700 transition-colors"
+              >
+                {keySaved ? "Saved!" : "Save"}
+              </button>
+              {apiKey && (
+                <button
+                  onClick={handleClearKey}
+                  className="rounded-lg border border-slate-300 px-4 py-2.5 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-colors"
+                >
+                  Clear
+                </button>
+              )}
+            </div>
+            {getStoredApiKey() && (
+              <p className="mt-3 text-xs text-green-600 flex items-center gap-1">
+                <svg className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                </svg>
+                API key configured — real AI generation is active
+              </p>
+            )}
+          </div>
+        )}
 
         {showUpgrade && (
           <div className="mb-8 rounded-2xl border border-amber-200 bg-amber-50 p-6">
@@ -193,6 +310,16 @@ export default function GeneratePage() {
 
             {results && activeListing && (
               <div className="space-y-4">
+                {/* Demo Mode Badge */}
+                {resultMode === "demo" && (
+                  <div className="flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm text-amber-700">
+                    <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span><strong>Demo mode</strong> — showing sample listings. Add your API key in Settings for real AI-generated content.</span>
+                  </div>
+                )}
+
                 {/* Marketplace Tabs */}
                 <div className="flex flex-wrap gap-2">
                   {MARKETPLACE_TABS.map((tab) => (
