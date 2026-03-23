@@ -79,6 +79,69 @@ export default function HomePage() {
         </div>
       </section>
 
+      <section className="border-y border-slate-100 bg-slate-50/50 py-12">
+        <div className="mx-auto max-w-7xl px-6">
+          <p className="mb-8 text-center text-sm font-medium uppercase tracking-wider text-slate-400">Works with all major marketplaces</p>
+          <div className="flex flex-wrap items-center justify-center gap-x-12 gap-y-6">
+            {[
+              { name: "Amazon", color: "text-orange-500", letter: "a" },
+              { name: "Etsy", color: "text-orange-600", letter: "E" },
+              { name: "Shopify", color: "text-green-600", letter: "S" },
+              { name: "eBay", color: "text-blue-600", letter: "e" },
+            ].map((mp) => (
+              <div key={mp.name} className="flex items-center gap-2">
+                <div className={`flex h-10 w-10 items-center justify-center rounded-xl bg-white shadow-sm border border-slate-200 text-lg font-bold ${mp.color}`}>{mp.letter}</div>
+                <span className="text-lg font-semibold text-slate-700">{mp.name}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="py-24 bg-white">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="mx-auto max-w-2xl text-center">
+            <h2 className="text-3xl font-bold tracking-tight text-slate-900 sm:text-4xl">Loved by e-commerce sellers</h2>
+            <p className="mt-4 text-lg text-slate-500">Join hundreds of sellers already saving hours on listing creation.</p>
+          </div>
+          <div className="mx-auto mt-16 grid max-w-5xl gap-8 sm:grid-cols-2 lg:grid-cols-3">
+            {[
+              {
+                quote: "QuickList AI cut my listing time from 2 hours to 5 minutes. The Amazon-optimized titles alone boosted my click-through rate by 35%.",
+                name: "Sarah M.",
+                role: "Etsy & Amazon Seller",
+                stars: 5,
+              },
+              {
+                quote: "I run a Shopify store with 200+ products. Bulk processing all my listings at once was a game-changer. The SEO keywords are spot-on.",
+                name: "James K.",
+                role: "Shopify Store Owner",
+                stars: 5,
+              },
+              {
+                quote: "Finally a tool that understands each marketplace is different. My eBay listings read differently from my Etsy ones, and that's exactly what I needed.",
+                name: "Maria L.",
+                role: "Multi-Platform Seller",
+                stars: 5,
+              },
+            ].map((testimonial) => (
+              <div key={testimonial.name} className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+                <div className="mb-3 flex gap-0.5">
+                  {Array.from({ length: testimonial.stars }).map((_, i) => (
+                    <svg key={i} className="h-4 w-4 text-amber-400" fill="currentColor" viewBox="0 0 20 20"><path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" /></svg>
+                  ))}
+                </div>
+                <p className="mb-4 text-sm leading-relaxed text-slate-600">&ldquo;{testimonial.quote}&rdquo;</p>
+                <div>
+                  <p className="text-sm font-semibold text-slate-900">{testimonial.name}</p>
+                  <p className="text-xs text-slate-500">{testimonial.role}</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       <section id="pricing" className="py-24 bg-slate-50">
         <div className="mx-auto max-w-7xl px-6">
           <div className="mx-auto max-w-2xl text-center">

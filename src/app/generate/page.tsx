@@ -78,10 +78,30 @@ export default function GeneratePage() {
   const [showSettings, setShowSettings] = useState(false);
   const [apiKey, setApiKey] = useState("");
   const [keySaved, setKeySaved] = useState(false);
+  const [loadingStep, setLoadingStep] = useState(0);
 
   useEffect(() => {
     setApiKey(getStoredApiKey());
   }, []);
+
+  useEffect(() => {
+    if (!loading) {
+      setLoadingStep(0);
+      return;
+    }
+    const steps = [0, 1, 2, 3, 4];
+    let current = 0;
+    setLoadingStep(0);
+    const interval = setInterval(() => {
+      current++;
+      if (current < steps.length) {
+        setLoadingStep(current);
+      } else {
+        clearInterval(interval);
+      }
+    }, 1800);
+    return () => clearInterval(interval);
+  }, [loading]);
 
   const handleSaveKey = () => {
     setStoredApiKey(apiKey);
@@ -290,20 +310,45 @@ export default function GeneratePage() {
           <div className="lg:col-span-3">
             {loading && (
               <div className="rounded-2xl border border-slate-200 bg-white p-8 shadow-sm">
-                <div className="mb-6 flex gap-2">
-                  {MARKETPLACE_TABS.map((tab) => (
-                    <div key={tab.key} className="h-9 w-24 animate-pulse rounded-lg bg-slate-200" />
-                  ))}
-                </div>
-                <div className="animate-pulse space-y-4">
-                  <div className="h-4 w-24 rounded bg-slate-200" />
-                  <div className="h-6 w-full rounded bg-slate-200" />
-                  <div className="h-4 w-32 rounded bg-slate-200" />
-                  <div className="space-y-2">
-                    <div className="h-4 w-full rounded bg-slate-200" />
-                    <div className="h-4 w-full rounded bg-slate-200" />
-                    <div className="h-4 w-3/4 rounded bg-slate-200" />
+                <div className="mb-8 text-center">
+                  <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-2xl bg-indigo-100">
+                    <svg className="h-8 w-8 animate-spin text-indigo-600" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
                   </div>
+                  <h3 className="text-lg font-semibold text-slate-900">Generating your listings</h3>
+                  <p className="mt-1 text-sm text-slate-500">Our AI is crafting optimized content for all 4 marketplaces</p>
+                </div>
+                <div className="space-y-3">
+                  {[
+                    { label: "Analyzing product details", icon: "M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" },
+                    { label: "Researching marketplace trends", icon: "M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" },
+                    { label: "Optimizing for Amazon & Etsy", icon: "M13 10V3L4 14h7v7l9-11h-7z" },
+                    { label: "Generating SEO keywords", icon: "M7 20l4-16m2 16l4-16M6 9h14M4 15h14" },
+                    { label: "Finalizing all 4 listings", icon: "M5 13l4 4L19 7" },
+                  ].map((step, i) => (
+                    <div
+                      key={step.label}
+                      className={`flex items-center gap-3 rounded-xl px-4 py-3 transition-all duration-500 ${
+                        loadingStep > i
+                          ? "bg-green-50 text-green-700"
+                          : loadingStep === i
+                          ? "bg-indigo-50 text-indigo-700"
+                          : "bg-slate-50 text-slate-400"
+                      }`}
+                    >
+                      {loadingStep > i ? (
+                        <svg className="h-5 w-5 shrink-0 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                        </svg>
+                      ) : loadingStep === i ? (
+                        <svg className="h-5 w-5 shrink-0 animate-spin" viewBox="0 0 24 24" fill="none"><circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" /><path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z" /></svg>
+                      ) : (
+                        <svg className="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
+                          <path strokeLinecap="round" strokeLinejoin="round" d={step.icon} />
+                        </svg>
+                      )}
+                      <span className="text-sm font-medium">{step.label}</span>
+                    </div>
+                  ))}
                 </div>
               </div>
             )}
