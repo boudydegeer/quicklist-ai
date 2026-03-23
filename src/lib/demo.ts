@@ -1,8 +1,25 @@
 import type { GeneratedListing, Marketplace, ProductInput } from "@/types";
 
 export function isDemoMode(): boolean {
-  const key = process.env.ANTHROPIC_API_KEY;
-  return !key || key === "demo" || key === "your-key-here";
+  const provider = (process.env.AI_PROVIDER || "").toLowerCase();
+
+  // Explicit demo mode
+  if (provider === "demo") return true;
+
+  // If provider is gemini, check for Gemini key
+  if (provider === "gemini") {
+    const geminiKey = process.env.GEMINI_API_KEY;
+    return !geminiKey || geminiKey === "your-key-here";
+  }
+
+  // If provider is anthropic (or unset), check for Anthropic key
+  if (provider === "anthropic" || provider === "") {
+    const anthropicKey = process.env.ANTHROPIC_API_KEY;
+    return !anthropicKey || anthropicKey === "demo" || anthropicKey === "your-key-here";
+  }
+
+  // Unknown provider — fall back to demo
+  return true;
 }
 
 export function isSupabaseConfigured(): boolean {

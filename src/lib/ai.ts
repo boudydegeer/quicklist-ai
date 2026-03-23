@@ -64,15 +64,15 @@ Generate a complete, optimized product listing. Return ONLY valid JSON with this
 IMPORTANT: Return ONLY the JSON object. No markdown, no code fences, no explanation.`;
 }
 
-export async function generateListing(
-  input: ProductInput
-): Promise<GeneratedListing> {
-  if (isDemoMode()) {
-    // Simulate a small delay to feel realistic
-    await new Promise((resolve) => setTimeout(resolve, 800));
-    return getDemoListing(input);
-  }
+type AIProvider = "gemini" | "anthropic";
 
+function getProvider(): AIProvider {
+  const provider = (process.env.AI_PROVIDER || "").toLowerCase();
+  if (provider === "gemini") return "gemini";
+  return "anthropic";
+}
+
+async function callAnthropicAPI(prompt: string): Promise<string> {
   const apiKey = process.env.ANTHROPIC_API_KEY;
 
   if (!apiKey || apiKey === "your-key-here") {
@@ -82,7 +82,6 @@ export async function generateListing(
   }
 
   const model = process.env.ANTHROPIC_MODEL || "claude-haiku-4-5-20251001";
-  const prompt = buildPrompt(input);
 
   const response = await fetch("https://api.anthropic.com/v1/messages", {
     method: "POST",
@@ -94,12 +93,7 @@ export async function generateListing(
     body: JSON.stringify({
       model,
       max_tokens: 1024,
-      messages: [
-        {
-          role: "user",
-          content: prompt,
-        },
-      ],
+      messages: [{ role: "user", content: prompt }],
     }),
   });
 
@@ -115,6 +109,49 @@ export async function generateListing(
     throw new Error("Empty response from Anthropic API");
   }
 
+  return content;
+}
+
+async function callGeminiAPI(prompt: string): Promise<string> {
+  const apiKey = process.env.GEMINI_API_KEY;
+
+  if (!apiKey || apiKey === "your-key-here") {
+    throw new Error(
+      "GEMINI_API_KEY is not configured. Please add a valid API key to .env.local"
+    );
+  }
+
+  const model = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+  const url = `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent?key=${apiKey}`;
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      contents: [{ parts: [{ text: prompt }] }],
+      generationConfig: { temperature: 0.7, maxOutputTokens: 1024 },
+    }),
+  });
+
+  if (!response.ok) {
+    const error = await response.text();
+    throw new Error(`Gemini API error (${response.status}): ${error}`);
+  }
+
+  const data = await response.json();
+  const content = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+  if (!content) {
+    throw new Error("Empty response from Gemini API");
+  }
+
+  return content;
+}
+
+function parseAIResponse(
+  content: string,
+  marketplace: ProductInput["marketplace"]
+): GeneratedListing {
   let parsed: Record<string, unknown>;
   try {
     const cleaned = content
@@ -138,7 +175,7 @@ export async function generateListing(
       ? parsed.seoKeywords.map(String)
       : [],
     imageAltText: String(parsed.imageAltText || ""),
-    marketplace: input.marketplace,
+    marketplace,
   };
 
   if (!listing.title || !listing.description) {
@@ -146,4 +183,23 @@ export async function generateListing(
   }
 
   return listing;
+}
+
+export async function generateListing(
+  input: ProductInput
+): Promise<GeneratedListing> {
+  if (isDemoMode()) {
+    await new Promise((resolve) => setTimeout(resolve, 800));
+    return getDemoListing(input);
+  }
+
+  const prompt = buildPrompt(input);
+  const provider = getProvider();
+
+  const content =
+    provider === "gemini"
+      ? await callGeminiAPI(prompt)
+      : await callAnthropicAPI(prompt);
+
+  return parseAIResponse(content, input.marketplace);
 }
