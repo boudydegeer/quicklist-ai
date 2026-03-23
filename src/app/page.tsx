@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import WaitlistForm from "@/components/WaitlistForm";
 
 const features = [
   {
@@ -119,6 +120,28 @@ export default function HomePage() {
               View full pricing details &rarr;
             </Link>
           </div>
+        </div>
+      </section>
+
+      <section id="waitlist" className="relative overflow-hidden py-24">
+        <div className="absolute inset-0 bg-gradient-to-br from-indigo-600 to-purple-700" />
+        <div className="absolute inset-0">
+          <div className="absolute top-10 left-1/4 h-64 w-64 rounded-full bg-white/10 blur-3xl" />
+          <div className="absolute bottom-10 right-1/4 h-80 w-80 rounded-full bg-purple-300/20 blur-3xl" />
+        </div>
+        <div className="relative mx-auto max-w-3xl px-6 text-center">
+          <h2 className="text-3xl font-bold tracking-tight text-white sm:text-4xl">
+            Get early access to QuickList AI
+          </h2>
+          <p className="mx-auto mt-4 max-w-xl text-lg text-indigo-100">
+            Join the waitlist and be the first to know when we launch Pro features, bulk processing, and more.
+          </p>
+          <div className="mt-10 mx-auto max-w-lg">
+            <WaitlistForm />
+          </div>
+          <p className="mt-4 text-sm text-indigo-200">
+            No spam, ever. Unsubscribe anytime.
+          </p>
         </div>
       </section>
 

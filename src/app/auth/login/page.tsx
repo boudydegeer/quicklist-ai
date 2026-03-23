@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import WaitlistForm from "@/components/WaitlistForm";
 
 export default function LoginPage() {
   return (
@@ -21,22 +22,18 @@ export default function LoginPage() {
           </div>
           <h2 className="mb-2 text-xl font-bold text-slate-900">Full Version Coming Soon</h2>
           <p className="mb-6 text-sm text-slate-500">
-            Authentication will be available when we launch. In the meantime, try our interactive demo!
+            Authentication will be available when we launch. Join the waitlist to get early access!
           </p>
-          <Link
-            href="/generate"
-            className="inline-flex w-full items-center justify-center rounded-xl bg-indigo-600 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-600/25 transition-all hover:bg-indigo-700"
-          >
-            Try the Demo
-          </Link>
+          <WaitlistForm variant="card" />
+          <div className="mt-4 pt-4 border-t border-slate-100">
+            <Link
+              href="/generate"
+              className="text-sm font-medium text-indigo-600 hover:text-indigo-700 transition-colors"
+            >
+              Try the Demo &rarr;
+            </Link>
+          </div>
         </div>
-
-        <p className="mt-6 text-sm text-slate-400">
-          Want early access?{" "}
-          <a href="mailto:hello@quicklistai.com" className="font-medium text-indigo-600 hover:text-indigo-700">
-            Join the waitlist
-          </a>
-        </p>
       </div>
     </div>
   );

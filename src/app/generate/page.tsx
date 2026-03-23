@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import CopyButton from "@/components/CopyButton";
+import WaitlistForm from "@/components/WaitlistForm";
 import { getDemoListingsForAll } from "@/lib/demo";
 import {
   hasReachedLimit,
@@ -56,6 +57,7 @@ export default function GeneratePage() {
   const [activeTab, setActiveTab] = useState<Marketplace>("amazon");
   const [error, setError] = useState<string | null>(null);
   const [showUpgrade, setShowUpgrade] = useState(false);
+  const [showWaitlistCta, setShowWaitlistCta] = useState(true);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -304,6 +306,31 @@ export default function GeneratePage() {
           </div>
         </div>
       </main>
+
+      {showWaitlistCta && (
+        <div className="fixed bottom-0 left-0 right-0 z-50 border-t border-indigo-200 bg-gradient-to-r from-indigo-600 to-purple-600 px-6 py-3 shadow-lg">
+          <div className="mx-auto flex max-w-7xl flex-col items-center gap-3 sm:flex-row sm:justify-between">
+            <div className="flex items-center gap-3 text-white">
+              <svg className="h-5 w-5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                <path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" />
+              </svg>
+              <span className="text-sm font-medium">Like what you see? Join the waitlist for full access!</span>
+            </div>
+            <div className="flex items-center gap-3">
+              <WaitlistForm />
+              <button
+                onClick={() => setShowWaitlistCta(false)}
+                className="shrink-0 rounded-lg p-1.5 text-indigo-200 hover:bg-white/10 hover:text-white transition-colors"
+                aria-label="Dismiss"
+              >
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
