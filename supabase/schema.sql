@@ -33,3 +33,14 @@ CREATE POLICY "Users can view own profile" ON profiles FOR SELECT USING (auth.ui
 CREATE POLICY "Users can update own profile" ON profiles FOR UPDATE USING (auth.uid() = id);
 CREATE POLICY "Users can view own generations" ON generations FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Users can insert own generations" ON generations FOR INSERT WITH CHECK (auth.uid() = user_id);
+
+-- Function to increment generations_used counter
+CREATE OR REPLACE FUNCTION increment_generations_used(uid UUID, count INTEGER DEFAULT 1)
+RETURNS VOID AS $$
+BEGIN
+  UPDATE profiles
+  SET generations_used = generations_used + count,
+      updated_at = NOW()
+  WHERE id = uid;
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;

@@ -74,6 +74,7 @@ export async function generateListing(
     );
   }
 
+  const model = process.env.ANTHROPIC_MODEL || "claude-haiku-4-5-20251001";
   const prompt = buildPrompt(input);
 
   const response = await fetch("https://api.anthropic.com/v1/messages", {
@@ -84,7 +85,7 @@ export async function generateListing(
       "anthropic-version": "2023-06-01",
     },
     body: JSON.stringify({
-      model: "claude-haiku-4-5-20251001",
+      model,
       max_tokens: 1024,
       messages: [
         {

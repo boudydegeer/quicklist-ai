@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
 import { generateListing } from "@/lib/ai";
 import type { ProductInput, Marketplace, GeneratedListing } from "@/types";
 
@@ -9,6 +10,8 @@ const VALID_MARKETPLACES: Marketplace[] = [
   "ebay",
   "generic",
 ];
+
+const RATE_LIMIT_DELAY_MS = 500;
 
 interface BulkResult {
   index: number;
@@ -45,8 +48,21 @@ function parseCSV(csv: string): string[][] {
   });
 }
 
+function delay(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
+
 export async function POST(request: Request) {
   try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const body = await request.json();
     const { csv } = body as { csv: string };
 
@@ -119,14 +135,39 @@ export async function POST(request: Request) {
         continue;
       }
 
+      // Rate limit delay between API calls
+      if (i > 0) {
+        await delay(RATE_LIMIT_DELAY_MS);
+      }
+
       try {
         const listing = await generateListing(input);
+
+        // Save generation to database
+        await supabase.from("generations").insert({
+          user_id: user.id,
+          product_name: input.name,
+          category: input.category,
+          marketplace: input.marketplace,
+          input_data: input,
+          output_data: listing,
+        });
+
         results.push({ index: i, input, listing });
       } catch (error) {
         const message =
           error instanceof Error ? error.message : "Generation failed";
         results.push({ index: i, input, error: message });
       }
+    }
+
+    // Increment usage counter for successful generations
+    const successCount = results.filter((r) => r.listing).length;
+    if (successCount > 0) {
+      await supabase.rpc("increment_generations_used", {
+        uid: user.id,
+        count: successCount,
+      });
     }
 
     return NextResponse.json({ results, total: dataRows.length });

@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { createClient } from "@/lib/supabase/server";
 import { generateListing } from "@/lib/ai";
 import type { ProductInput, Marketplace } from "@/types";
 
@@ -12,6 +13,15 @@ const VALID_MARKETPLACES: Marketplace[] = [
 
 export async function POST(request: Request) {
   try {
+    const supabase = await createClient();
+    const {
+      data: { user },
+    } = await supabase.auth.getUser();
+
+    if (!user) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const body = await request.json();
 
     const { name, category, features, marketplace, targetAudience, priceRange } =
@@ -46,6 +56,19 @@ export async function POST(request: Request) {
     };
 
     const listing = await generateListing(input);
+
+    // Save generation to database
+    await supabase.from("generations").insert({
+      user_id: user.id,
+      product_name: input.name,
+      category: input.category,
+      marketplace: input.marketplace,
+      input_data: input,
+      output_data: listing,
+    });
+
+    // Increment usage counter
+    await supabase.rpc("increment_generations_used", { uid: user.id });
 
     return NextResponse.json(listing);
   } catch (error) {

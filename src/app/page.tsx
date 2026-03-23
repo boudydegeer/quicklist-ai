@@ -1,10 +1,14 @@
+"use client";
+
 import Link from "next/link";
+import { useState } from "react";
+import { createClient } from "@/lib/supabase/client";
 
 const features = [
   {
     title: "Multi-Marketplace",
     description: "Optimized listings for Amazon, Etsy, Shopify, eBay, and more. Each platform gets tailored content following its specific algorithm requirements.",
-    icon: (<svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A88.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" /></svg>),
+    icon: (<svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A88.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" /></svg>),
   },
   {
     title: "AI-Optimized",
@@ -24,12 +28,65 @@ const features = [
 ];
 
 const plans = [
-  { name: "Starter", price: "$29", period: "/mo", listings: "50 listings", description: "Perfect for individual sellers getting started.", features: ["50 AI-generated listings/month", "All 5 marketplaces", "SEO optimization", "Copy-to-clipboard export", "Email support"], cta: "Start Free Trial", highlighted: false },
-  { name: "Pro", price: "$79", period: "/mo", listings: "250 listings", description: "For growing businesses scaling their presence.", features: ["250 AI-generated listings/month", "All 5 marketplaces", "SEO optimization", "Bulk CSV processing", "CSV export", "Priority support"], cta: "Start Free Trial", highlighted: true },
-  { name: "Agency", price: "$199", period: "/mo", listings: "1000 listings", description: "For agencies managing multiple brands.", features: ["1,000 AI-generated listings/month", "All 5 marketplaces", "SEO optimization", "Bulk CSV processing", "CSV & API export", "Custom brand voice", "Dedicated support"], cta: "Contact Sales", highlighted: false },
+  { name: "Starter", price: "$29", period: "/mo", listings: "50 listings", description: "Perfect for individual sellers getting started.", features: ["50 AI-generated listings/month", "All 5 marketplaces", "SEO optimization", "Copy-to-clipboard export", "Email support"], cta: "Start Free Trial", highlighted: false, planKey: "starter" },
+  { name: "Pro", price: "$79", period: "/mo", listings: "250 listings", description: "For growing businesses scaling their presence.", features: ["250 AI-generated listings/month", "All 5 marketplaces", "SEO optimization", "Bulk CSV processing", "CSV export", "Priority support"], cta: "Start Free Trial", highlighted: true, planKey: "pro" },
+  { name: "Agency", price: "$199", period: "/mo", listings: "1000 listings", description: "For agencies managing multiple brands.", features: ["1,000 AI-generated listings/month", "All 5 marketplaces", "SEO optimization", "Bulk CSV processing", "CSV & API export", "Custom brand voice", "Dedicated support"], cta: "Contact Sales", highlighted: false, planKey: "agency" },
 ];
 
+const PLAN_PRICE_IDS: Record<string, string | undefined> = {
+  starter: process.env.NEXT_PUBLIC_STRIPE_STARTER_PRICE_ID,
+  pro: process.env.NEXT_PUBLIC_STRIPE_PRO_PRICE_ID,
+  agency: process.env.NEXT_PUBLIC_STRIPE_AGENCY_PRICE_ID,
+};
+
 export default function HomePage() {
+  const [loadingPlan, setLoadingPlan] = useState<string | null>(null);
+
+  const handlePlanClick = async (planKey: string) => {
+    if (planKey === "agency") {
+      window.location.href = "mailto:sales@quicklistai.com?subject=Agency Plan Inquiry";
+      return;
+    }
+
+    setLoadingPlan(planKey);
+
+    try {
+      const supabase = createClient();
+      const {
+        data: { user },
+      } = await supabase.auth.getUser();
+
+      if (!user) {
+        window.location.href = `/auth/signup?redirect=/#pricing`;
+        return;
+      }
+
+      const priceId = PLAN_PRICE_IDS[planKey];
+      if (!priceId) {
+        alert("Pricing is not configured yet. Please try again later.");
+        return;
+      }
+
+      const response = await fetch("/api/stripe/checkout", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ priceId, userId: user.id }),
+      });
+
+      const data = await response.json();
+
+      if (data.url) {
+        window.location.href = data.url;
+      } else {
+        alert("Failed to create checkout session. Please try again.");
+      }
+    } catch {
+      alert("Something went wrong. Please try again.");
+    } finally {
+      setLoadingPlan(null);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-white text-slate-900">
 
@@ -103,7 +160,13 @@ export default function HomePage() {
                     </li>
                   ))}
                 </ul>
-                <button className={`w-full rounded-xl py-3 text-sm font-semibold transition-all duration-200 ${plan.highlighted ? "bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg shadow-indigo-600/25" : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"}`}>{plan.cta}</button>
+                <button
+                  onClick={() => handlePlanClick(plan.planKey)}
+                  disabled={loadingPlan === plan.planKey}
+                  className={`w-full rounded-xl py-3 text-sm font-semibold transition-all duration-200 disabled:opacity-50 ${plan.highlighted ? "bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg shadow-indigo-600/25" : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"}`}
+                >
+                  {loadingPlan === plan.planKey ? "Loading..." : plan.cta}
+                </button>
               </div>
             ))}
           </div>

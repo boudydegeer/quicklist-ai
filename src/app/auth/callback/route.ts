@@ -8,8 +8,26 @@ export async function GET(request: Request) {
 
   if (code) {
     const supabase = await createClient();
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
-    if (!error) {
+    const { error, data } = await supabase.auth.exchangeCodeForSession(code);
+
+    if (!error && data.user) {
+      // Ensure profile exists for new users
+      const { data: existingProfile } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("id", data.user.id)
+        .single();
+
+      if (!existingProfile) {
+        await supabase.from("profiles").insert({
+          id: data.user.id,
+          email: data.user.email ?? "",
+          plan: "free",
+          generations_used: 0,
+          generations_limit: 5,
+        });
+      }
+
       return NextResponse.redirect(origin + next);
     }
   }
