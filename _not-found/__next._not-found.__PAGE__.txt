@@ -1,0 +1,6 @@
+1:"$Sreact.fragment"
+2:I[22016,["/quicklist-ai/_next/static/chunks/053y6149_bw.q.js","/quicklist-ai/_next/static/chunks/0d3shmwh5_nmn.js"],""]
+3:I[97367,["/quicklist-ai/_next/static/chunks/053y6149_bw.q.js","/quicklist-ai/_next/static/chunks/0d3shmwh5_nmn.js"],"OutletBoundary"]
+4:"$Sreact.suspense"
+0:{"rsc":["$","$1","c",{"children":[["$","div",null,{"className":"flex min-h-screen flex-col items-center justify-center bg-white px-6 text-center","children":[["$","h1",null,{"className":"text-6xl font-bold text-indigo-600","children":"404"}],["$","h2",null,{"className":"mt-4 text-2xl font-semibold text-slate-900","children":"Page not found"}],["$","p",null,{"className":"mt-2 text-base text-slate-500","children":"Sorry, we couldn't find the page you're looking for."}],["$","$L2",null,{"href":"/","className":"mt-8 inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white hover:bg-indigo-700 transition-colors","children":"Go back home"}]]}],null,["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"isPartial":false,"staleTime":300,"varyParams":null,"buildId":"eeUDjwjOl9bHt5bsegaKu"}
+5:null
