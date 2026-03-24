@@ -118,10 +118,13 @@ export default function GeneratePage() {
     setStoredApiKey("");
   };
 
+  const hasByokKey = !!getStoredApiKey();
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (hasReachedLimit()) {
+    // BYOK users bypass daily limit — they use their own key
+    if (!hasByokKey && hasReachedLimit()) {
       setShowUpgrade(true);
       return;
     }
@@ -145,14 +148,13 @@ export default function GeneratePage() {
       if (IS_STATIC) {
         const storedKey = getStoredApiKey();
 
-        // BYOK: call Gemini directly from the browser
+        // BYOK: call Gemini directly from the browser (no usage limit)
         if (storedKey) {
           const data = await generateListingsClientSide(productInput, storedKey);
           setResults(data.listings);
           setResultMode("live");
           setActiveTab("amazon");
           setShowWaitlistCta(true);
-          incrementUsage();
           return;
         }
 
@@ -198,7 +200,7 @@ export default function GeneratePage() {
       setResultMode(data.mode);
       setActiveTab("amazon");
       setShowWaitlistCta(true);
-      incrementUsage();
+      if (!hasByokKey) incrementUsage();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
@@ -232,7 +234,11 @@ export default function GeneratePage() {
               Settings
             </button>
             <div className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-600">
-              <span className="font-medium">{remaining}</span>/{FREE_DAILY_LIMIT} free generations remaining today
+              {hasByokKey ? (
+                <span className="font-medium text-green-600">Unlimited (BYOK)</span>
+              ) : (
+                <><span className="font-medium">{remaining}</span>/{FREE_DAILY_LIMIT} free generations remaining today</>
+              )}
             </div>
           </div>
         </div>
@@ -396,13 +402,21 @@ export default function GeneratePage() {
 
             {results && activeListing && (
               <div className="space-y-4">
-                {/* Demo Mode Badge */}
+                {/* Result Mode Badge */}
                 {resultMode === "demo" && (
                   <div className="flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-4 py-2.5 text-sm text-amber-700">
                     <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
                     <span><strong>Demo mode</strong> — showing sample listings. {IS_STATIC ? "Add your Gemini API key in Settings for real AI-generated content." : "Add your API key in Settings for real AI-generated content."}</span>
+                  </div>
+                )}
+                {resultMode === "live" && hasByokKey && (
+                  <div className="flex items-center gap-2 rounded-xl border border-green-200 bg-green-50 px-4 py-2.5 text-sm text-green-700">
+                    <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                    </svg>
+                    <span><strong>BYOK Mode</strong> — generated with your own API key.</span>
                   </div>
                 )}
 
