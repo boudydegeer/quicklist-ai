@@ -84,6 +84,29 @@ function buildDemoListing(
   };
 }
 
+// Bullet pattern generators — each uses a different sentence structure
+const bulletPatterns = {
+  benefitDriven: (feature: string, name: string) =>
+    `${feature.toUpperCase()} — Crafted with premium ${feature.toLowerCase()} that delivers a noticeably better experience`,
+  questionHook: (feature: string, name: string) =>
+    `${feature.toUpperCase()} — Tired of settling for less? Our ${feature.toLowerCase()} is built to exceed your expectations`,
+  statClaim: (feature: string, name: string) =>
+    `${feature.toUpperCase()} — Trusted by thousands of satisfied customers who chose the ${name} for its ${feature.toLowerCase()}`,
+  comparisonEdge: (feature: string, name: string) =>
+    `${feature.toUpperCase()} — While others cut corners, we invested in ${feature.toLowerCase()} you can actually feel`,
+  outcomeFirst: (feature: string, name: string) =>
+    `${feature.toUpperCase()} — Get the results you want with ${feature.toLowerCase()} designed for real-world performance`,
+};
+
+const bulletPatternList = Object.values(bulletPatterns);
+
+function variedBullets(name: string, features: string[], fallbacks: string[]): string[] {
+  if (features.length === 0) return fallbacks;
+  return features.slice(0, 5).map((f, i) =>
+    bulletPatternList[i % bulletPatternList.length](f, name)
+  );
+}
+
 const marketplaceStyles: Record<Marketplace, {
   titleTemplate: (name: string, features: string[]) => string;
   descriptionTemplate: (name: string, category: string, features: string[], audience: string) => string;
@@ -91,113 +114,165 @@ const marketplaceStyles: Record<Marketplace, {
 }> = {
   amazon: {
     titleTemplate: (name, features) => {
-      const featureHighlights = features.slice(0, 3).join(", ");
-      return featureHighlights
-        ? `${name} - ${featureHighlights} | Premium Quality`
-        : `${name} - Premium Quality, Top Rated`;
+      const highlights = features.slice(0, 3).join(", ");
+      return highlights
+        ? `${name} — ${highlights} | Professional Grade`
+        : `${name} — Professional Grade, Top Rated`;
     },
     descriptionTemplate: (name, category, features, audience) => {
-      const featureList = features.length > 0
-        ? features.map((f) => `• ${f}`).join("\n")
-        : "• Premium materials\n• Exceptional quality\n• Built to last";
-      return `Discover the ${name}${category ? `, perfect for ${category}` : ""}. Designed for ${audience} who demand the best.\n\n${featureList}\n\nOur ${name} is crafted with attention to detail and backed by our satisfaction guarantee. Whether you're upgrading your collection or looking for the perfect gift, this is the choice you'll be glad you made.\n\nOrder now and experience the difference quality makes.`;
+      const hook = `Looking for a ${name.toLowerCase()} that actually lives up to the hype?`;
+      const categoryLine = category ? ` Whether you need it for ${category} or everyday use, this is the one.` : "";
+      const featureBlock = features.length > 0
+        ? `\n\nWhy customers choose the ${name}:\n${features.map((f, i) => {
+            const prefixes = ["✅", "🔹", "⭐", "💡", "🎯"];
+            return `${prefixes[i % prefixes.length]} ${f}`;
+          }).join("\n")}`
+        : "\n\n✅ Premium materials built to last\n🔹 Thoughtful design for everyday use\n⭐ Exceptional quality at every touchpoint";
+      return `${hook}${categoryLine}\n\nDesigned for ${audience} who refuse to compromise, the ${name} combines form and function in ways that matter.${featureBlock}\n\nEvery ${name} is backed by our satisfaction guarantee. If it doesn't meet your standards, send it back — no questions asked.\n\n🛒 Add to cart now and see the difference for yourself.`;
     },
     bulletTemplate: (name, features) => {
-      const bullets = features.slice(0, 4).map((f) => `${f.toUpperCase()} — Premium ${f.toLowerCase()} that sets the ${name} apart from the competition`);
-      if (bullets.length === 0) {
-        bullets.push(`PREMIUM QUALITY — ${name} built with the finest materials for lasting performance`);
-        bullets.push(`VERSATILE DESIGN — Perfect for everyday use and special occasions alike`);
-      }
-      bullets.push(`SATISFACTION GUARANTEED — Love your ${name} or your money back, no questions asked`);
-      return bullets;
+      return variedBullets(name, features, [
+        `PREMIUM BUILD — The ${name} uses materials you can feel the moment you pick it up`,
+        `VERSATILE BY DESIGN — Works for everyday use, special occasions, and everything in between`,
+        `SATISFACTION GUARANTEED — Love your ${name} or return it for a full refund, no questions asked`,
+      ]);
     },
   },
   etsy: {
     titleTemplate: (name, features) => {
       const tags = features.slice(0, 2).map((f) => f.trim());
       const tagPart = tags.length > 0 ? ` | ${tags.join(" | ")}` : " | Handcrafted | Unique Gift";
-      return `${name}${tagPart}`;
+      return `${name}${tagPart} | Ready to Ship`;
     },
     descriptionTemplate: (name, category, features, audience) => {
+      const story = category
+        ? `This ${name.toLowerCase()} was born from a simple idea: ${category} lovers deserve something better than mass-produced alternatives.`
+        : `Every ${name.toLowerCase()} tells a story — and this one is waiting to become part of yours.`;
       const featureDesc = features.length > 0
-        ? `\n\nWhat makes it special:\n${features.map((f) => `✦ ${f}`).join("\n")}`
+        ? `\n\nWhat makes it special:\n${features.map((f, i) => {
+            const markers = ["✦", "◆", "▸", "•", "→"];
+            return `${markers[i % markers.length]} ${f}`;
+          }).join("\n")}`
         : "";
-      return `Meet your new favorite ${name.toLowerCase()}${category ? ` — lovingly crafted for ${category} enthusiasts` : ""}. Each piece is made with care and attention to detail, ensuring you receive something truly special.${featureDesc}\n\nPerfect as a gift for ${audience} or a well-deserved treat for yourself. Every order is carefully packaged and shipped with love.\n\nThank you for supporting small business! 💛`;
+      return `${story}\n\nEach piece is made by hand with the kind of care and attention you just can't get from a factory. We select every material, check every detail, and package every order like it's going to a friend.${featureDesc}\n\nWhether you're treating yourself or finding the perfect gift for ${audience}, this ${name.toLowerCase()} is ready to impress.\n\n📦 Carefully wrapped and shipped within 1-3 business days.\n💛 Thank you for supporting independent makers!`;
     },
     bulletTemplate: (name, features) => {
-      const bullets = features.slice(0, 4).map((f) => `${f} — crafted with care and attention to detail`);
-      if (bullets.length === 0) {
-        bullets.push(`Handcrafted ${name} made with premium materials`);
-        bullets.push("Unique design you won't find in big box stores");
+      if (features.length === 0) {
+        return [
+          `Handcrafted ${name} — each piece is one of a kind`,
+          "Made with sustainably sourced materials you can feel good about",
+          "Unique design you won't find on mass-market shelves",
+          "Gift-ready packaging included at no extra cost",
+          "Ships within 1-3 business days with tracking",
+        ];
       }
-      bullets.push("Ships within 1-3 business days with tracking");
+      const etsyPatterns = [
+        (f: string) => `${f} — handmade with materials we personally source and inspect`,
+        (f: string) => `${f} — because you deserve something made with intention, not just a machine`,
+        (f: string) => `${f} — a detail our customers mention again and again in their reviews`,
+        (f: string) => `${f} — designed to look even better with time and use`,
+        (f: string) => `${f} — the kind of quality that makes this a gift people actually keep`,
+      ];
+      const bullets = features.slice(0, 5).map((f, i) => etsyPatterns[i % etsyPatterns.length](f));
+      bullets.push("Ships within 1-3 business days with tracking included");
       return bullets;
     },
   },
   shopify: {
     titleTemplate: (name, features) => {
       return features.length > 0
-        ? `${name} — ${features[0]}`
-        : name;
+        ? `The ${name} — ${features[0]}`
+        : `The ${name}`;
     },
     descriptionTemplate: (name, category, features, audience) => {
+      const intro = category
+        ? `We designed the ${name} for one reason: to be the last ${category.toLowerCase()} product you'll ever need to buy.`
+        : `We designed the ${name} to be the kind of product you recommend to friends.`;
       const featureParagraph = features.length > 0
-        ? `\n\nKey features:\n${features.map((f) => `- ${f}`).join("\n")}`
+        ? `\n\nWhat sets it apart:\n${features.map((f) => `→ ${f}`).join("\n")}`
         : "";
-      return `Introducing the ${name}${category ? ` — designed for ${category}` : ""}. Built for ${audience} who expect nothing but the best.${featureParagraph}\n\nWith a focus on quality and performance, the ${name} delivers on every front. Clean design meets practical functionality in a package you'll love.\n\nFree shipping on orders over $50. 30-day hassle-free returns.`;
+      return `${intro} Built for ${audience} who value substance over hype.${featureParagraph}\n\nThe ${name} isn't just another option — it's the one that ends the search. Thoughtful design, premium materials, and details that reveal themselves over time.\n\n✓ Free shipping on orders over $50\n✓ 30-day hassle-free returns\n✓ Lifetime customer support`;
     },
     bulletTemplate: (name, features) => {
-      const bullets = features.slice(0, 4).map((f) => `${f} for premium performance`);
-      if (bullets.length === 0) {
-        bullets.push(`Premium ${name} designed for daily use`);
-        bullets.push("Modern design with practical functionality");
+      if (features.length === 0) {
+        return [
+          `The ${name} — designed for people who notice the details`,
+          "Premium materials selected for look, feel, and longevity",
+          "Minimalist design that fits seamlessly into your routine",
+          "Free shipping and 30-day returns",
+        ];
       }
-      bullets.push("Free shipping and 30-day returns");
+      const shopifyPatterns = [
+        (f: string) => `${f} — engineered for the kind of performance you'll notice from day one`,
+        (f: string) => `${f} — a considered choice, not a compromise`,
+        (f: string) => `${f} — because the best products earn their place in your daily life`,
+        (f: string) => `${f} — the detail that turns first-time buyers into repeat customers`,
+        (f: string) => `${f} — designed to look and perform better than the price suggests`,
+      ];
+      const bullets = features.slice(0, 5).map((f, i) => shopifyPatterns[i % shopifyPatterns.length](f));
+      bullets.push("Free shipping on orders over $50. 30-day returns");
       return bullets;
     },
   },
   ebay: {
     titleTemplate: (name, features) => {
-      const featurePart = features.slice(0, 2).join(" ");
-      return featurePart
-        ? `${name} ${featurePart} - Brand New - Fast Shipping`
-        : `${name} - Brand New - Premium Quality - Fast Shipping`;
+      const specs = features.slice(0, 2).join(" ");
+      return specs
+        ? `${name} ${specs} — Brand New — Free Fast Shipping`
+        : `${name} — Brand New — Premium Quality — Free Fast Shipping`;
     },
     descriptionTemplate: (name, category, features, audience) => {
+      const catLabel = category ? ` (${category})` : "";
       const specs = features.length > 0
-        ? `\n\nSpecifications:\n${features.map((f) => `- ${f}`).join("\n")}`
+        ? `\n\nSpecifications:\n${features.map((f) => `• ${f}`).join("\n")}`
         : "";
-      return `Up for sale: ${name}${category ? ` (${category})` : ""}. Perfect for ${audience}.${specs}\n\nCondition: Brand new\nShips within 1 business day. 30-day hassle-free returns.\n\nBuy with confidence — 100% satisfaction guaranteed.`;
+      return `FOR SALE: ${name}${catLabel} — Brand New in Box\n\nGrab this ${name.toLowerCase()} before it's gone. Perfect for ${audience} looking for quality without overpaying.${specs}\n\nCondition: Brand new, factory sealed\nShipping: FREE — dispatched within 1 business day\nReturns: 30-day hassle-free return policy\n\n⚡ Buy with confidence — top-rated seller with 100% satisfaction guarantee.\n\nHave questions? Message us — we respond within hours.`;
     },
     bulletTemplate: (name, features) => {
-      const bullets = features.slice(0, 4).map((f) => f);
-      if (bullets.length === 0) {
-        bullets.push(`Brand new ${name} in original packaging`);
-        bullets.push("Premium quality materials and construction");
+      if (features.length === 0) {
+        return [
+          `Brand new ${name} — factory sealed in original packaging`,
+          "Inspected for quality before every shipment",
+          "Priced below retail — same product, better deal",
+          "FREE fast shipping — dispatched within 1 business day",
+          "30-day hassle-free return policy — no restocking fee",
+        ];
       }
-      bullets.push("Fast shipping within 1 business day");
-      bullets.push("30-day hassle-free return policy");
+      const ebayPatterns = [
+        (f: string) => `${f} — brand new, exactly as described`,
+        (f: string) => `${f} — same quality you'd get in store, shipped to your door`,
+        (f: string) => `${f} — verified and inspected before shipping`,
+        (f: string) => `${f} — hard to find at this price point`,
+        (f: string) => `${f} — see our reviews from verified buyers`,
+      ];
+      const bullets = features.slice(0, 5).map((f, i) => ebayPatterns[i % ebayPatterns.length](f));
+      bullets.push("FREE fast shipping — dispatched within 1 business day");
+      bullets.push("30-day hassle-free returns — buy with confidence");
       return bullets;
     },
   },
   generic: {
     titleTemplate: (name, features) => {
-      return features.length > 0 ? `${name} - ${features[0]}` : name;
+      return features.length > 0 ? `${name} — ${features[0]}` : name;
     },
     descriptionTemplate: (name, category, features, audience) => {
       const featureList = features.length > 0
         ? `\n\nFeatures:\n${features.map((f) => `- ${f}`).join("\n")}`
         : "";
-      return `${name}${category ? ` for ${category}` : ""}. Designed for ${audience}.${featureList}\n\nQuality you can trust, backed by our satisfaction guarantee.`;
+      return `The ${name}${category ? ` for ${category}` : ""} — designed for ${audience} who want quality they can count on.${featureList}\n\nBacked by our satisfaction guarantee. If it doesn't meet your expectations, we'll make it right.`;
     },
     bulletTemplate: (name, features) => {
-      const bullets = features.slice(0, 4).map((f) => f);
-      if (bullets.length === 0) {
-        bullets.push(`Premium ${name}`);
-        bullets.push("High-quality materials");
+      if (features.length === 0) {
+        return [
+          `Premium ${name} — built with quality materials`,
+          "Designed for reliability and everyday use",
+          "Satisfaction guaranteed",
+        ];
       }
-      bullets.push("Satisfaction guaranteed");
-      return bullets;
+      return [
+        ...features.slice(0, 5),
+        "Satisfaction guaranteed",
+      ];
     },
   },
 };
