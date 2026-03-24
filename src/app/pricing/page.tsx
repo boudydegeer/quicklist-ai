@@ -172,14 +172,14 @@ export default function PricingPage() {
                 </button>
               ) : (
                 <Link
-                  href="/auth/signup"
+                  href="/#waitlist"
                   className={`block w-full rounded-xl py-3 text-center text-sm font-semibold transition-all duration-200 ${
                     plan.highlighted
                       ? "bg-indigo-600 text-white hover:bg-indigo-700 shadow-lg shadow-indigo-600/25"
                       : "border border-slate-300 bg-white text-slate-700 hover:bg-slate-50"
                   }`}
                 >
-                  Sign Up to Upgrade
+                  Join Waitlist
                 </Link>
               )}
             </div>
