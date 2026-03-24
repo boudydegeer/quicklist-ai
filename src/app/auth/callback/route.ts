@@ -1,19 +1,9 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@/lib/supabase/server";
 
-export async function GET(request: Request) {
-  const { searchParams, origin } = new URL(request.url);
-  const code = searchParams.get("code");
-  const next = searchParams.get("next") ?? "/dashboard";
+export const dynamic = "force-static";
 
-  if (code) {
-    const supabase = await createClient();
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
-    if (!error) {
-      return NextResponse.redirect(`${origin}${next}`);
-    }
-  }
-
-  // Auth code exchange failed — redirect to login with error
-  return NextResponse.redirect(`${origin}/auth/login?error=auth_callback_failed`);
+export async function GET() {
+  // In static export mode, auth callbacks are handled client-side.
+  // This route exists as a placeholder to prevent build errors.
+  return NextResponse.json({ error: "Auth callback requires server mode" }, { status: 400 });
 }

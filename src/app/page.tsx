@@ -15,9 +15,9 @@ const features = [
     icon: (<svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z" /></svg>),
   },
   {
-    title: "Bulk Processing",
-    description: "Upload a CSV with hundreds of products and generate optimized listings for all of them at once. Save hours of manual work.",
-    icon: (<svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M3.75 9.776c.112-.017.227-.026.344-.026h15.812c.117 0 .232.009.344.026m-16.5 0a2.25 2.25 0 00-1.883 2.542l.857 6a2.25 2.25 0 002.227 1.932H19.05a2.25 2.25 0 002.227-1.932l.857-6a2.25 2.25 0 00-1.883-2.542m-16.5 0V6A2.25 2.25 0 016 3.75h3.879a1.5 1.5 0 011.06.44l2.122 2.12a1.5 1.5 0 001.06.44H18A2.25 2.25 0 0120.25 9v.776" /></svg>),
+    title: "Bring Your Own Key",
+    description: "Add your free Google Gemini API key and get unlimited AI-powered listings — no subscription required. Full control, zero cost.",
+    icon: (<svg className="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" /></svg>),
   },
   {
     title: "SEO Ready",
@@ -27,7 +27,7 @@ const features = [
 ];
 
 const plans = [
-  { name: "Free", price: "$0", period: "", listings: "3/day", description: "Try it out — no account needed.", features: ["3 AI-generated listings/day", "All 4 marketplaces", "SEO optimization", "Copy-to-clipboard", "CSV export"], cta: "Start Generating", highlighted: false },
+  { name: "Free", price: "$0", period: "", listings: "3/day", description: "Try it out — no account needed.", features: ["3 AI-generated listings/day", "Unlimited with your own API key", "All 4 marketplaces", "SEO optimization", "Copy-to-clipboard"], cta: "Start Generating", highlighted: false },
   { name: "Pro", price: "$29", period: "/mo", listings: "Unlimited", description: "For sellers scaling across marketplaces.", features: ["Unlimited listings", "All 4 marketplaces", "Bulk CSV processing", "Generation history", "Priority support"], cta: "Upgrade to Pro", highlighted: true },
   { name: "Business", price: "$79", period: "/mo", listings: "Unlimited+", description: "For teams and agencies.", features: ["Everything in Pro", "Team access (5 members)", "Custom brand voice", "API access", "Dedicated support"], cta: "Contact Sales", highlighted: false },
 ];
@@ -56,6 +56,12 @@ export default function HomePage() {
             <div className="flex flex-col items-center gap-4 sm:flex-row sm:justify-center">
               <Link href="/generate" className="inline-flex items-center gap-2 rounded-xl bg-indigo-600 px-8 py-3.5 text-base font-semibold text-white shadow-lg shadow-indigo-600/25 hover:bg-indigo-700 transition-all duration-200">Try It Now<svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" /></svg></Link>
               <Link href="/dashboard" className="inline-flex items-center gap-2 rounded-xl border border-slate-300 bg-white px-8 py-3.5 text-base font-semibold text-slate-700 hover:bg-slate-50 transition-all duration-200">View Dashboard</Link>
+            </div>
+            <div className="mt-6">
+              <Link href="/generate" className="inline-flex items-center gap-2 rounded-full border border-indigo-200 bg-indigo-50/80 px-4 py-2 text-sm text-indigo-700 hover:bg-indigo-100 transition-colors">
+                <svg className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M15.75 5.25a3 3 0 013 3m3 0a6 6 0 01-7.029 5.912c-.563-.097-1.159.026-1.563.43L10.5 17.25H8.25v2.25H6v2.25H2.25v-2.818c0-.597.237-1.17.659-1.591l6.499-6.499c.404-.404.527-1 .43-1.563A6 6 0 1121.75 8.25z" /></svg>
+                Bring your own Gemini API key &mdash; unlimited AI listings, 100% free
+              </Link>
             </div>
           </div>
         </div>
