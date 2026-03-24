@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import Navbar from "@/components/Navbar";
 import DemoBannerWrapper from "@/components/DemoBannerWrapper";
 import { AuthProvider } from "@/contexts/AuthContext";
-import { Analytics } from "@vercel/analytics/react";
+import { VercelAnalytics } from "@/components/VercelAnalytics";
 import { Inter } from "next/font/google";
 import "./globals.css";
 
@@ -111,6 +111,8 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
+        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+        <link rel="apple-touch-icon" href="/favicon.svg" />
         <JsonLd />
       </head>
       <body className={[inter.variable, "font-sans antialiased"].join(" ")}>
@@ -119,7 +121,7 @@ export default function RootLayout({
           <Navbar />
           {children}
         </AuthProvider>
-        <Analytics />
+        <VercelAnalytics />
       </body>
     </html>
   );
