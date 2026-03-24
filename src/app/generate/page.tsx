@@ -11,6 +11,7 @@ import {
   FREE_DAILY_LIMIT,
 } from "@/lib/usage";
 import { getDemoListingsForAll } from "@/lib/demo";
+import { generateListingsClientSide } from "@/lib/ai-client";
 import type { Marketplace, GeneratedListing } from "@/types";
 
 const IS_STATIC = process.env.NEXT_PUBLIC_STATIC_EXPORT === "true";
@@ -132,16 +133,31 @@ export default function GeneratePage() {
     setResultMode(null);
 
     try {
-      // In static export mode, use demo data directly (no API route available)
+      const productInput = {
+        name,
+        category,
+        features,
+        targetAudience: targetAudience || undefined,
+        priceRange: priceRange || undefined,
+      };
+
+      // In static export mode, no API route is available
       if (IS_STATIC) {
-        const listings = getDemoListingsForAll({
-          name,
-          category,
-          features,
-          targetAudience: targetAudience || undefined,
-          priceRange: priceRange || undefined,
-        });
-        // Simulate brief loading for UX
+        const storedKey = getStoredApiKey();
+
+        // BYOK: call Gemini directly from the browser
+        if (storedKey) {
+          const data = await generateListingsClientSide(productInput, storedKey);
+          setResults(data.listings);
+          setResultMode("live");
+          setActiveTab("amazon");
+          setShowWaitlistCta(true);
+          incrementUsage();
+          return;
+        }
+
+        // No key — fall back to demo data
+        const listings = getDemoListingsForAll(productInput);
         await new Promise((resolve) => setTimeout(resolve, 2000));
         setResults(listings);
         setResultMode("demo");
@@ -233,14 +249,16 @@ export default function GeneratePage() {
               </button>
             </div>
             <p className="text-sm text-slate-500 mb-4">
-              Bring your own API key for real AI-powered listings. Supports Anthropic (sk-ant-...) and Google Gemini keys. Your key is stored locally in your browser and never saved on our servers.
+              {IS_STATIC
+                ? "Bring your own Google Gemini API key for real AI-powered listings. Get a free key at aistudio.google.com. Your key is stored locally in your browser and never sent to our servers."
+                : "Bring your own API key for real AI-powered listings. Supports Anthropic (sk-ant-...) and Google Gemini keys. Your key is stored locally in your browser and never saved on our servers."}
             </p>
             <div className="flex gap-3">
               <input
                 type="password"
                 value={apiKey}
                 onChange={(e) => setApiKey(e.target.value)}
-                placeholder="Enter your API key (sk-ant-... or Gemini key)"
+                placeholder={IS_STATIC ? "Enter your Gemini API key" : "Enter your API key (sk-ant-... or Gemini key)"}
                 className="flex-1 rounded-lg border border-slate-300 px-4 py-2.5 text-sm text-slate-900 placeholder:text-slate-400 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
               />
               <button
@@ -384,7 +402,7 @@ export default function GeneratePage() {
                     <svg className="h-4 w-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
                       <path strokeLinecap="round" strokeLinejoin="round" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                     </svg>
-                    <span><strong>Demo mode</strong> — showing sample listings. Add your API key in Settings for real AI-generated content.</span>
+                    <span><strong>Demo mode</strong> — showing sample listings. {IS_STATIC ? "Add your Gemini API key in Settings for real AI-generated content." : "Add your API key in Settings for real AI-generated content."}</span>
                   </div>
                 )}
 
