@@ -20,6 +20,7 @@ export default function Navbar() {
           <Link href="/generate" className="text-sm text-slate-600 hover:text-slate-900 transition-colors">Generate</Link>
           <Link href="/bulk" className="text-sm text-slate-600 hover:text-slate-900 transition-colors">Bulk Upload</Link>
           <Link href="/pricing" className="text-sm text-slate-600 hover:text-slate-900 transition-colors">Pricing</Link>
+          <Link href="/compare" className="text-sm text-slate-600 hover:text-slate-900 transition-colors">Compare</Link>
           {user ? (
             <Link href="/dashboard" className="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 transition-colors">Dashboard</Link>
           ) : configured ? (
@@ -50,6 +51,7 @@ export default function Navbar() {
             <Link href="/generate" className="text-sm text-slate-600 hover:text-slate-900" onClick={() => setMenuOpen(false)}>Generate</Link>
             <Link href="/bulk" className="text-sm text-slate-600 hover:text-slate-900" onClick={() => setMenuOpen(false)}>Bulk Upload</Link>
             <Link href="/pricing" className="text-sm text-slate-600 hover:text-slate-900" onClick={() => setMenuOpen(false)}>Pricing</Link>
+            <Link href="/compare" className="text-sm text-slate-600 hover:text-slate-900" onClick={() => setMenuOpen(false)}>Compare</Link>
             {user ? (
               <Link href="/dashboard" className="text-sm font-medium text-indigo-600 hover:text-indigo-700" onClick={() => setMenuOpen(false)}>Dashboard</Link>
             ) : configured ? (

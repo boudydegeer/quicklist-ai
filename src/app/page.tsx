@@ -220,6 +220,7 @@ export default function HomePage() {
               <Link href="/pricing" className="text-sm text-slate-500 hover:text-slate-700 transition-colors">Pricing</Link>
               <Link href="/generate" className="text-sm text-slate-500 hover:text-slate-700 transition-colors">Generate</Link>
               <Link href="/bulk" className="text-sm text-slate-500 hover:text-slate-700 transition-colors">Bulk</Link>
+              <Link href="/compare" className="text-sm text-slate-500 hover:text-slate-700 transition-colors">Compare</Link>
             </div>
             <p className="text-sm text-slate-400">&copy; 2026 QuickList AI. All rights reserved.</p>
           </div>
