@@ -74,7 +74,7 @@ export default function GeneratePage() {
   const [activeTab, setActiveTab] = useState<Marketplace>("amazon");
   const [error, setError] = useState<string | null>(null);
   const [showUpgrade, setShowUpgrade] = useState(false);
-  const [showWaitlistCta, setShowWaitlistCta] = useState(true);
+  const [showWaitlistCta, setShowWaitlistCta] = useState(false);
   const [resultMode, setResultMode] = useState<"demo" | "live" | null>(null);
 
   // BYOK state
@@ -146,6 +146,7 @@ export default function GeneratePage() {
         setResults(listings);
         setResultMode("demo");
         setActiveTab("amazon");
+        setShowWaitlistCta(true);
         incrementUsage();
         return;
       }
@@ -180,6 +181,7 @@ export default function GeneratePage() {
       setResults(data.listings);
       setResultMode(data.mode);
       setActiveTab("amazon");
+      setShowWaitlistCta(true);
       incrementUsage();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
@@ -192,7 +194,7 @@ export default function GeneratePage() {
   const activeListing = results ? results[activeTab] : null;
 
   return (
-    <div className="min-h-screen bg-slate-50">
+    <div className={`min-h-screen bg-slate-50 ${showWaitlistCta ? "pb-28 sm:pb-20" : ""}`}>
       <main className="mx-auto max-w-7xl px-6 py-10 pt-24">
         <div className="mb-8 flex items-end justify-between">
           <div>
