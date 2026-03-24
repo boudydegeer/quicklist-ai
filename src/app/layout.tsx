@@ -53,6 +53,10 @@ export const metadata: Metadata = {
   alternates: {
     canonical: siteUrl,
   },
+  icons: {
+    icon: { url: "/favicon.svg", type: "image/svg+xml" },
+    apple: "/favicon.svg",
+  },
 };
 
 function JsonLd() {
@@ -60,6 +64,7 @@ function JsonLd() {
     "@context": "https://schema.org",
     "@type": "SoftwareApplication",
     name: "QuickList AI",
+    url: "https://boudydegeer.github.io/quicklist-ai/",
     applicationCategory: "BusinessApplication",
     operatingSystem: "Web",
     description:
@@ -111,8 +116,6 @@ export default function RootLayout({
   return (
     <html lang="en">
       <head>
-        <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
-        <link rel="apple-touch-icon" href="/favicon.svg" />
         <JsonLd />
       </head>
       <body className={[inter.variable, "font-sans antialiased"].join(" ")}>
