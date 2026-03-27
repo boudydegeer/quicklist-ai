@@ -17,6 +17,7 @@ import {
   Badge,
   Box,
   Select,
+  EmptyState,
   useIndexResourceState,
 } from "@shopify/polaris";
 import { getProducts } from "~/services/shopify.server";
@@ -83,6 +84,21 @@ export default function BulkOptimizePage() {
   const isOptimizing = navigation.state === "submitting";
 
   const [marketplace, setMarketplace] = useState("shopify");
+
+  if (products.length === 0) {
+    return (
+      <Page title="Bulk Optimize" backAction={{ url: "/" }}>
+        <Card>
+          <EmptyState
+            heading="No products found"
+            image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
+          >
+            <p>Add products to your Shopify store to start bulk optimization.</p>
+          </EmptyState>
+        </Card>
+      </Page>
+    );
+  }
 
   const resourceName = {
     singular: "product",

@@ -1,3 +1,4 @@
+import { useState } from "react";
 import type { MetaFunction } from "@remix-run/node";
 import { useNavigate } from "@remix-run/react";
 import {
@@ -6,18 +7,24 @@ import {
   Card,
   Text,
   Button,
-  Banner,
+  CalloutCard,
   BlockStack,
   InlineGrid,
   InlineStack,
   Icon,
   Box,
   Divider,
+  EmptyState,
+  SkeletonPage,
+  SkeletonBodyText,
+  SkeletonDisplayText,
 } from "@shopify/polaris";
 import {
   ProductIcon,
   AutomationIcon,
   SettingsIcon,
+  CheckCircleIcon,
+  CircleIcon,
 } from "@shopify/polaris-icons";
 
 export const meta: MetaFunction = () => {
@@ -51,23 +58,72 @@ function StatCard({ title, value, subtitle }: StatCardProps) {
   );
 }
 
+interface OnboardingStep {
+  label: string;
+  url: string;
+  completed: boolean;
+}
+
 export default function Dashboard() {
   const navigate = useNavigate();
+  const [showOnboarding, setShowOnboarding] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const onboardingSteps: OnboardingStep[] = [
+    { label: "Configure your API key", url: "/settings", completed: false },
+    { label: "Optimize your first product", url: "/optimize", completed: false },
+    { label: "Try bulk optimization", url: "/bulk", completed: false },
+  ];
+
+  if (isLoading) {
+    return (
+      <Page title="QuickList AI">
+        <BlockStack gap="500">
+          <SkeletonDisplayText size="small" />
+          <InlineGrid columns={3} gap="400">
+            <Card><SkeletonBodyText lines={3} /></Card>
+            <Card><SkeletonBodyText lines={3} /></Card>
+            <Card><SkeletonBodyText lines={3} /></Card>
+          </InlineGrid>
+        </BlockStack>
+      </Page>
+    );
+  }
 
   return (
     <Page title="QuickList AI">
       <BlockStack gap="500">
-        <Banner
-          title="Welcome to QuickList AI!"
-          tone="info"
-          onDismiss={() => {}}
-        >
-          <p>
-            Optimize your product listings with AI for better visibility across
-            Amazon, eBay, Etsy, and Shopify. Get started by optimizing your
-            first product.
-          </p>
-        </Banner>
+        {showOnboarding && (
+          <CalloutCard
+            title="Welcome to QuickList AI!"
+            illustration="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
+            primaryAction={{
+              content: "Get Started",
+              url: "/settings",
+            }}
+            onDismiss={() => setShowOnboarding(false)}
+          >
+            <BlockStack gap="300">
+              <p>
+                Complete these steps to get the most out of QuickList AI.
+              </p>
+              {onboardingSteps.map((step, index) => (
+                <InlineStack key={index} gap="200" blockAlign="center">
+                  <Icon
+                    source={step.completed ? CheckCircleIcon : CircleIcon}
+                    tone={step.completed ? "success" : "subdued"}
+                  />
+                  <Button
+                    variant="plain"
+                    onClick={() => navigate(step.url)}
+                  >
+                    {`${index + 1}. ${step.label}`}
+                  </Button>
+                </InlineStack>
+              ))}
+            </BlockStack>
+          </CalloutCard>
+        )}
 
         <Text as="h2" variant="headingMd">
           Performance Overview
@@ -165,8 +221,8 @@ export default function Dashboard() {
                 <Text as="h3" variant="headingSm">
                   Recent Optimizations
                 </Text>
-                <BlockStack gap="200">
-                  {[
+                {(() => {
+                  const recentOptimizations = [
                     {
                       name: "Vintage Leather Messenger Bag",
                       marketplace: "Amazon",
@@ -191,29 +247,53 @@ export default function Dashboard() {
                       improvement: "+22%",
                       time: "2 days ago",
                     },
-                  ].map((item, index) => (
-                    <Box
-                      key={index}
-                      padding="300"
-                      background="bg-surface-secondary"
-                      borderRadius="200"
-                    >
-                      <InlineStack align="space-between" blockAlign="center">
-                        <BlockStack gap="100">
-                          <Text as="p" variant="bodyMd" fontWeight="semibold">
-                            {item.name}
-                          </Text>
-                          <Text as="p" variant="bodySm" tone="subdued">
-                            {item.marketplace} &middot; {item.time}
-                          </Text>
-                        </BlockStack>
-                        <Text as="p" variant="bodyMd" tone="success">
-                          {item.improvement}
-                        </Text>
-                      </InlineStack>
-                    </Box>
-                  ))}
-                </BlockStack>
+                  ];
+
+                  if (recentOptimizations.length === 0) {
+                    return (
+                      <EmptyState
+                        heading="No optimizations yet"
+                        image="https://cdn.shopify.com/s/files/1/0262/4071/2726/files/emptystate-files.png"
+                        action={{
+                          content: "Optimize a Product",
+                          url: "/optimize",
+                        }}
+                      >
+                        <p>
+                          Start optimizing your product listings to see results
+                          here.
+                        </p>
+                      </EmptyState>
+                    );
+                  }
+
+                  return (
+                    <BlockStack gap="200">
+                      {recentOptimizations.map((item, index) => (
+                        <Box
+                          key={index}
+                          padding="300"
+                          background="bg-surface-secondary"
+                          borderRadius="200"
+                        >
+                          <InlineStack align="space-between" blockAlign="center">
+                            <BlockStack gap="100">
+                              <Text as="p" variant="bodyMd" fontWeight="semibold">
+                                {item.name}
+                              </Text>
+                              <Text as="p" variant="bodySm" tone="subdued">
+                                {item.marketplace} &middot; {item.time}
+                              </Text>
+                            </BlockStack>
+                            <Text as="p" variant="bodyMd" tone="success">
+                              {item.improvement}
+                            </Text>
+                          </InlineStack>
+                        </Box>
+                      ))}
+                    </BlockStack>
+                  );
+                })()}
               </BlockStack>
             </Card>
           </Layout.Section>
