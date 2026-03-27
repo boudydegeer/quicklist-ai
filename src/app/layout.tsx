@@ -11,7 +11,8 @@ const inter = Inter({
   variable: "--font-inter",
 });
 
-const siteUrl = "https://quicklist-ai.vercel.app";
+const basePath = process.env.STATIC_EXPORT === "true" ? "/quicklist-ai" : "";
+const siteUrl = "https://boudydegeer.github.io/quicklist-ai";
 
 export const metadata: Metadata = {
   title: "QuickList AI - AI-Powered Product Listing Optimizer",
@@ -54,8 +55,8 @@ export const metadata: Metadata = {
     canonical: siteUrl,
   },
   icons: {
-    icon: { url: "/favicon.svg", type: "image/svg+xml" },
-    apple: "/favicon.svg",
+    icon: { url: `${basePath}/favicon.svg`, type: "image/svg+xml" },
+    apple: `${basePath}/favicon.svg`,
   },
 };
 
