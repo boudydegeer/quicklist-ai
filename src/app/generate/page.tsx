@@ -9,6 +9,10 @@ import {
   incrementUsage,
   getRemainingGenerations,
   FREE_DAILY_LIMIT,
+  hasByokReachedLimit,
+  incrementByokUsage,
+  getByokRemainingGenerations,
+  BYOK_DAILY_LIMIT,
 } from "@/lib/usage";
 import { getDemoListingsForAll } from "@/lib/demo";
 import { generateListingsClientSide } from "@/lib/ai-client";
@@ -123,7 +127,11 @@ export default function GeneratePage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    // BYOK users bypass daily limit — they use their own key
+    // BYOK users get 10/day, free users get 3/day
+    if (hasByokKey && hasByokReachedLimit()) {
+      setShowUpgrade(true);
+      return;
+    }
     if (!hasByokKey && hasReachedLimit()) {
       setShowUpgrade(true);
       return;
@@ -148,13 +156,14 @@ export default function GeneratePage() {
       if (IS_STATIC) {
         const storedKey = getStoredApiKey();
 
-        // BYOK: call Gemini directly from the browser (no usage limit)
+        // BYOK: call Gemini directly from the browser (10/day limit)
         if (storedKey) {
           const data = await generateListingsClientSide(productInput, storedKey);
           setResults(data.listings);
           setResultMode("live");
           setActiveTab("amazon");
           setShowWaitlistCta(true);
+          incrementByokUsage();
           return;
         }
 
@@ -200,7 +209,11 @@ export default function GeneratePage() {
       setResultMode(data.mode);
       setActiveTab("amazon");
       setShowWaitlistCta(true);
-      if (!hasByokKey) incrementUsage();
+      if (hasByokKey) {
+        incrementByokUsage();
+      } else {
+        incrementUsage();
+      }
     } catch (err) {
       setError(err instanceof Error ? err.message : "Something went wrong");
     } finally {
@@ -208,7 +221,8 @@ export default function GeneratePage() {
     }
   };
 
-  const remaining = getRemainingGenerations();
+  const remaining = hasByokKey ? getByokRemainingGenerations() : getRemainingGenerations();
+  const dailyLimit = hasByokKey ? BYOK_DAILY_LIMIT : FREE_DAILY_LIMIT;
   const activeListing = results ? results[activeTab] : null;
 
   return (
@@ -250,9 +264,9 @@ export default function GeneratePage() {
             </button>
             <div className="rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm text-slate-600">
               {hasByokKey ? (
-                <span className="font-medium text-green-600">Unlimited (BYOK)</span>
+                <><span className="font-medium text-green-600">{remaining}</span>/{BYOK_DAILY_LIMIT} BYOK generations today</>
               ) : (
-                <><span className="font-medium">{remaining}</span>/{FREE_DAILY_LIMIT} free generations remaining today</>
+                <><span className="font-medium">{remaining}</span>/{dailyLimit} free generations remaining today</>
               )}
             </div>
           </div>
@@ -271,8 +285,8 @@ export default function GeneratePage() {
             </div>
             <p className="text-sm text-slate-500 mb-4">
               {IS_STATIC
-                ? "Bring your own Google Gemini API key for real AI-powered listings. Get a free key at aistudio.google.com. Your key is stored locally in your browser and never sent to our servers."
-                : "Bring your own API key for real AI-powered listings. Supports Anthropic (sk-ant-...) and Google Gemini keys. Your key is stored locally in your browser and never saved on our servers."}
+                ? "Bring your own Google Gemini API key for AI-powered listings (10/day, standard quality). Get a free key at aistudio.google.com. Upgrade to Pro for unlimited enhanced quality. Your key is stored locally."
+                : "Bring your own API key for AI-powered listings (10/day, standard quality). Supports Anthropic (sk-ant-...) and Google Gemini keys. Upgrade to Pro for unlimited enhanced quality. Your key is stored locally."}
             </p>
             <div className="flex gap-3">
               <input
@@ -314,7 +328,9 @@ export default function GeneratePage() {
               <div>
                 <h3 className="text-lg font-semibold text-amber-900">Daily limit reached</h3>
                 <p className="mt-1 text-sm text-amber-700">
-                  You&apos;ve used all {FREE_DAILY_LIMIT} free generations for today. Upgrade to Pro for unlimited listings.
+                  {hasByokKey
+                    ? `You've used all ${BYOK_DAILY_LIMIT} BYOK generations for today. Upgrade to Pro for unlimited listings with enhanced quality.`
+                    : `You've used all ${FREE_DAILY_LIMIT} free generations for today. Upgrade to Pro for unlimited listings.`}
                 </p>
               </div>
               <Link
