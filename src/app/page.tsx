@@ -395,10 +395,12 @@ export default function HomePage() {
               <div className="flex h-7 w-7 items-center justify-center rounded-lg bg-indigo-600 text-white text-xs font-bold">Q</div>
               <span className="text-sm font-semibold">QuickList AI</span>
             </div>
-            <div className="flex gap-8">
+            <div className="flex flex-wrap gap-x-8 gap-y-2 justify-center">
               <a href="#features" className="text-sm text-slate-500 hover:text-slate-700 transition-colors">Features</a>
               <Link href="/pricing" className="text-sm text-slate-500 hover:text-slate-700 transition-colors">Pricing</Link>
               <Link href="/generate" className="text-sm text-slate-500 hover:text-slate-700 transition-colors">Generate</Link>
+              <Link href="/tools/amazon-listing-generator" className="text-sm text-slate-500 hover:text-slate-700 transition-colors">Amazon Tool</Link>
+              <Link href="/tools/etsy-title-optimizer" className="text-sm text-slate-500 hover:text-slate-700 transition-colors">Etsy Tool</Link>
               <Link href="/bulk" className="text-sm text-slate-500 hover:text-slate-700 transition-colors">Bulk</Link>
               <Link href="/compare" className="text-sm text-slate-500 hover:text-slate-700 transition-colors">Compare</Link>
             </div>
