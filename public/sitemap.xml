@@ -2,7 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
     <loc>https://boudydegeer.github.io/quicklist-ai/</loc>
-    <lastmod>2026-03-24</lastmod>
+    <lastmod>2026-03-27</lastmod>
     <priority>1.0</priority>
   </url>
   <url>
@@ -31,8 +31,23 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://boudydegeer.github.io/quicklist-ai/tools/amazon-listing-generator</loc>
+    <lastmod>2026-03-27</lastmod>
+    <priority>0.9</priority>
+  </url>
+  <url>
+    <loc>https://boudydegeer.github.io/quicklist-ai/tools/etsy-title-optimizer</loc>
+    <lastmod>2026-03-27</lastmod>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://boudydegeer.github.io/quicklist-ai/blog/</loc>
-    <lastmod>2026-03-24</lastmod>
+    <lastmod>2026-03-27</lastmod>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://boudydegeer.github.io/quicklist-ai/blog/amazon-listing-optimization-guide-2026</loc>
+    <lastmod>2026-03-27</lastmod>
     <priority>0.8</priority>
   </url>
   <url>
@@ -86,27 +101,27 @@
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://boudydegeer.github.io/quicklist-ai/for/jewelry.html</loc>
+    <loc>https://boudydegeer.github.io/quicklist-ai/for/jewelry</loc>
     <lastmod>2026-03-24</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://boudydegeer.github.io/quicklist-ai/for/handmade.html</loc>
+    <loc>https://boudydegeer.github.io/quicklist-ai/for/handmade</loc>
     <lastmod>2026-03-24</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://boudydegeer.github.io/quicklist-ai/for/amazon-fba.html</loc>
+    <loc>https://boudydegeer.github.io/quicklist-ai/for/amazon-fba</loc>
     <lastmod>2026-03-24</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://boudydegeer.github.io/quicklist-ai/for/vintage.html</loc>
+    <loc>https://boudydegeer.github.io/quicklist-ai/for/vintage</loc>
     <lastmod>2026-03-24</lastmod>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://boudydegeer.github.io/quicklist-ai/for/clothing.html</loc>
+    <loc>https://boudydegeer.github.io/quicklist-ai/for/clothing</loc>
     <lastmod>2026-03-24</lastmod>
     <priority>0.7</priority>
   </url>
